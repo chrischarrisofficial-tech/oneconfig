@@ -394,8 +394,12 @@ def test_delete_from_the_panel_and_by_dragging_to_the_trash(app):
 
 
 def _slab(pg, host):
-    b = pg.locator(f'g.node[data-h="{host}"] rect.slab').bounding_box()
-    return b["x"] + b["width"] / 2, b["y"] + b["height"] / 2, b["width"]
+    for _ in range(20):  # the map redraws by replacing its SVG: the element found can be gone by the time it's measured
+        b = pg.locator(f'g.node[data-h="{host}"] rect.slab').bounding_box()
+        if b:
+            return b["x"] + b["width"] / 2, b["y"] + b["height"] / 2, b["width"]
+        pg.wait_for_timeout(25)
+    raise AssertionError(f"{host} is not on the map")
 
 
 def test_map_pans_and_zooms(app):
