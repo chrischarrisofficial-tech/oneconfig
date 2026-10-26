@@ -6,6 +6,10 @@ updates:
     directory: /
     schedule:
       interval: weekly
+    # The ranges in pyproject.toml are minimums; the versions actually used come from requirements/*.lock, which
+    # Dependabot can't recompile. Raising every minimum to the latest release would, among other things, require a
+    # cryptography that doesn't install on Intel Macs. So only raise a range when a needed version is outside it.
+    versioning-strategy: increase-if-necessary
     groups:
       python:
         patterns: ["*"]

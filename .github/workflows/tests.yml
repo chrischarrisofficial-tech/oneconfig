@@ -15,7 +15,7 @@ jobs:
   tests:
     name: tests (python ${{ matrix.python }})
     runs-on: ubuntu-latest
-    timeout-minutes: 30
+    timeout-minutes: 45  # the nightly run with the push suites takes about 30 on Python 3.10
     strategy:
       fail-fast: false
       matrix:
