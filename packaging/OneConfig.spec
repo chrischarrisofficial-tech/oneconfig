@@ -22,6 +22,7 @@ coll = COLLECT(exe, a.binaries, a.datas, name="OneConfig", upx=False)
 app = BUNDLE(
     coll,
     name="OneConfig.app",
+    icon=os.path.join(SPECPATH, "OneConfig.icns"),  # ONE above CONFIG; redraw with packaging/make_icon.py
     bundle_identifier="io.github.chrischarrisofficial-tech.oneconfig",
     version="0.1.0",
     info_plist={

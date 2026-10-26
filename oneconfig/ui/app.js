@@ -1577,7 +1577,9 @@ function renderDash() {
   const saveNew = () => { const n = nameIn.value.trim();
     if (!/^[A-Za-z0-9 _-]{1,32}$/.test(n)) return nameIn.focus(); PREF.layouts[n] = layout().map(x => [...x]); PREF.preset = n; savePrefs(); renderDash(); };
   nameIn.addEventListener("keydown", e => e.key === "Enter" && saveNew());
-  const lib = h("div", {class:"lib"},
+  const head = h("div", {class:"libhead", title:"Drag to move"}, h("span", {class:"grip", "aria-hidden":"true"}, "⋮⋮"),
+    h("span", {class:"k", style:"color:var(--t)"}, "Customize dashboard"), h("button", {class:"chipbtn", onclick:() => setEditing(false)}, "Done"));
+  const lib = h("div", {class:"lib", role:"dialog", "aria-label":"Customize dashboard"}, head,
     h("div", {class:"row2", style:"flex-wrap:wrap;justify-content:flex-start"}, h("span", {class:"k", style:"color:var(--t)"}, "Layout"),  // which layout
       ...Object.keys({...PRESETS, ...PREF.layouts}).map(n => h("button", {class:"chipbtn" + (n === PREF.preset ? " on" : ""), onclick:() => { PREF.preset = n; savePrefs(); renderDash(); }}, n))),
     h("div", {class:"libactions"},  // what to do with it: keep a copy under a new name, or put it back
@@ -1588,6 +1590,7 @@ function renderDash() {
     h("div", {class:"items"}, L.length >= MAXW ? h("span", {class:"sub"}, `This layout holds ${MAXW} widgets, the most it can. Remove one to add another, or save a new layout.`)
       : hidden.length ? hidden.map(k => h("button", {class:"chipbtn", onclick:() => { if (L.length < MAXW) { L.push([k, WID[k].sz[0]]); savePrefs(); renderDash(); } }}, "+ " + WID[k].t))
       : h("span", {class:"sub"}, "Every widget is on this layout.")));
+  placeLib(lib, head);
   const dash = $("#dash"), top = dash.scrollTop;  // a rebuild empties the grid for a moment, which scrolls it to the top
   dash.replaceChildren($("#stage"), ...tiles, lib);
   fitScreen();
@@ -1605,8 +1608,20 @@ function fitTiles() {
     const most = WIDE.matches ? (el.matches(".t, .l") ? 8 : 4) : 16;
     el.style.gridRow = `span ${Math.max(4, Math.min(most, Math.ceil((need + gap) / (row + gap))))}`;
   }
-  const lib = $("#dash .lib");  // the Customize panel: as tall as its content
-  if (lib && editing) { lib.style.gridRow = "span 1"; lib.style.gridRow = `span ${Math.ceil((lib.scrollHeight + gap) / (row + gap))}`; }
+}
+// The Customize box stays where it was last dragged (this browser only), kept on screen
+function placeLib(lib, head) {
+  const keep = (x, y) => { lib.style.left = Math.max(0, Math.min(x, innerWidth - 160)) + "px"; lib.style.top = Math.max(52, Math.min(y, innerHeight - 48)) + "px"; lib.style.right = "auto"; };
+  const at = store.get("oneconfig.libpos");
+  if (at) keep(at.x, at.y);
+  head.addEventListener("pointerdown", e => {
+    if (e.button !== 0 || e.target.closest("button")) return;
+    const r = lib.getBoundingClientRect(), dx = e.clientX - r.left, dy = e.clientY - r.top;
+    try { head.setPointerCapture(e.pointerId); } catch {}  // keeps the drag when the pointer leaves the title bar
+    const move = ev => keep(ev.clientX - dx, ev.clientY - dy);
+    head.addEventListener("pointermove", move);
+    head.addEventListener("pointerup", () => { head.removeEventListener("pointermove", move); store.set("oneconfig.libpos", {x:parseFloat(lib.style.left), y:parseFloat(lib.style.top)}); }, {once:true});
+  });
 }
 // Size the rows so the map and every widget fit the window without scrolling: as many tile units as the layout needs
 // (8 at least), down to the 64px a tile still reads at. Narrow windows stack the tiles under the map and scroll as before;

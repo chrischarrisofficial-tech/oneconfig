@@ -593,17 +593,23 @@ def test_known_models_get_their_real_port_names(app):
 
 def test_dashboard_fits_a_full_screen_and_keeps_its_place_while_customizing(app):
     pg, _ = app
+    tick = "() => new Promise(r => requestAnimationFrame(r))"
     pg.set_viewport_size({"width": 1440, "height": 900})  # a MacBook screen
     try:
-        over = pg.evaluate("""async () => { const out = {}, was = PREF.preset;
-            for (const p of Object.keys(PRESETS)) { PREF.preset = p; renderDash(); await new Promise(r => requestAnimationFrame(r));
+        over = pg.evaluate("""async () => { const out = {}, was = PREF.preset, tick = %s;
+            for (const p of Object.keys(PRESETS)) { PREF.preset = p; renderDash(); await tick();
                 const d = $("#dash"); out[p] = d.scrollHeight - d.clientHeight; }
-            PREF.preset = was; renderDash(); return out; }""")
+            PREF.preset = was; renderDash(); return out; }""" % tick)
         assert all(v <= 1 for v in over.values()), over  # no layout needs scrolling
-        kept = pg.evaluate("""async () => { const d = $("#dash"), tick = () => new Promise(r => requestAnimationFrame(r));
-            setEditing(true); await tick(); d.scrollTop = d.scrollHeight; await tick(); const before = d.scrollTop;
-            document.querySelector('#dash .w .ctl button[aria-label^="Remove"]').click(); await tick();
-            const after = d.scrollTop; setEditing(false); return [before, after]; }""")
-        assert kept[0] > 0 and kept[1] == kept[0], kept  # removing a widget leaves the view where it was
+        box = pg.evaluate("""async () => { setEditing(true); await (%s)(); const d = $("#dash"), r = $("#dash .lib").getBoundingClientRect();
+            return {over: d.scrollHeight - d.clientHeight, fixed: getComputedStyle($("#dash .lib")).position, onScreen: r.top >= 0 && r.bottom <= innerHeight}; }""" % tick)
+        assert box == {"over": 0, "fixed": "fixed", "onScreen": True}, box  # Customize floats over the page: nothing to scroll down to
+        pg.click('#dash .lib .libhead button:has-text("Done")')
+        assert not pg.evaluate("editing")
+        pg.set_viewport_size({"width": 800, "height": 700})  # narrow: tiles stack under the map and scroll
+        kept = pg.evaluate("""async () => { const d = $("#dash"), tick = %s; setEditing(true); await tick(); d.scrollTop = 300; await tick();
+            const before = d.scrollTop; document.querySelector('#dash .w .ctl button[aria-label$="later"]').click(); await tick();
+            const after = d.scrollTop; setEditing(false); return [before, after]; }""" % tick)
+        assert kept[0] > 0 and kept[1] == kept[0], kept  # moving a widget leaves the view where it was
     finally:
         pg.set_viewport_size({"width": 1500, "height": 1000})
