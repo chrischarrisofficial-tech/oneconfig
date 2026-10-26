@@ -1,0 +1,4 @@
+# Known, reviewed findings only (one fingerprint each), so a new secret anywhere is still reported.
+# Made-up SNMPv3 test key for the simulated agent on 127.0.0.1 in the discovery tests.
+b50d6b9e779d946e5eff565fd7541370f0dfeed8:tests/test_discover.py:generic-api-key:141
+b50d6b9e779d946e5eff565fd7541370f0dfeed8:tests/test_discover.py:generic-api-key:162
