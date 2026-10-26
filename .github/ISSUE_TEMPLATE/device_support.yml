@@ -1,0 +1,34 @@
+name: Device or feature support
+description: Ask for a device OS, model, feature or STIG rule OneConfig doesn't handle yet.
+labels: [enhancement]
+body:
+  - type: input
+    id: platform
+    attributes:
+      label: Vendor, OS and version
+      placeholder: e.g. Cisco IOS-XR 7.11, or Aruba AOS-CX 10.13
+    validations:
+      required: true
+  - type: dropdown
+    id: need
+    attributes:
+      label: What you need
+      multiple: true
+      options: [Generate configs, Audit and STIG checks, Discovery, Push with rollback, CVE lookup, A specific feature or setting]
+    validations:
+      required: true
+  - type: textarea
+    id: detail
+    attributes:
+      label: Details
+      description: What the device does, and how you configure it by hand today. Links to vendor docs help.
+    validations:
+      required: true
+  - type: textarea
+    id: sample
+    attributes:
+      label: Sample output (optional)
+      description: |
+        A sanitized running config, or `show version` / `show lldp neighbors` output, lets support be tested.
+        Remove passwords, keys, communities, serial numbers and public addresses.
+      render: text

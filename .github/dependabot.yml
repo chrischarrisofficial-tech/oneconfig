@@ -1,0 +1,15 @@
+# Weekly update pull requests; security fixes arrive as soon as an advisory is published.
+# After merging a Python update, recompile the locks (see CONTRIBUTING.md) so requirements/*.lock match.
+version: 2
+updates:
+  - package-ecosystem: pip
+    directory: /
+    schedule:
+      interval: weekly
+    groups:
+      python:
+        patterns: ["*"]
+  - package-ecosystem: github-actions
+    directory: /
+    schedule:
+      interval: weekly

@@ -1,0 +1,60 @@
+# Tests on every push and pull request; the slow push suites (simulated devices over SSH) once a night.
+name: tests
+
+on:
+  push:
+  pull_request:
+  schedule:
+    - cron: "17 7 * * *"  # nightly, push suites included
+  workflow_dispatch:      # run it by hand from the Actions tab
+
+permissions:
+  contents: read
+
+jobs:
+  tests:
+    name: tests (python ${{ matrix.python }})
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    strategy:
+      fail-fast: false
+      matrix:
+        python: ["3.10", "3.13"]  # the oldest supported, and the one the app is built with
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1  # v7.0.1
+      - uses: actions/setup-python@6d4fd22b20465ccc0f7354476588e8df7c9ca0e0  # v7.1.0
+        with:
+          python-version: ${{ matrix.python }}
+          cache: pip
+          cache-dependency-path: requirements/dev.lock
+      - name: Install (locked versions, checksums enforced)
+        run: |
+          python -m pip install --require-hashes -r requirements/dev.lock
+          python -m pip install -e . --no-deps
+      - name: Install Chromium for the UI tests
+        run: python -m playwright install --with-deps chromium
+      - name: Tests
+        run: |
+          if [ "${{ github.event_name }}" = "schedule" ] || [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
+            python -m pytest -q tests
+          else
+            python -m pytest -q tests --ignore-glob="tests/test_push*.py"  # the push suites run nightly: about 20 minutes
+          fi
+
+  audit:
+    name: known vulnerabilities in dependencies
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1  # v7.0.1
+      - uses: actions/setup-python@6d4fd22b20465ccc0f7354476588e8df7c9ca0e0  # v7.1.0
+        with:
+          python-version: "3.13"
+      - name: Install the locked app and test dependencies
+        run: |
+          python -m pip install --require-hashes -r requirements/app.lock
+          python -m pip install --require-hashes -r requirements/dev.lock
+      - name: pip-audit
+        run: |
+          python -m pip install pip-audit
+          pip-audit

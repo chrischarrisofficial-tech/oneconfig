@@ -1,0 +1,65 @@
+name: Bug report
+description: Something OneConfig does wrong, or a config it generates or pushes incorrectly.
+labels: [bug]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for taking the time. **Remove passwords, keys, SNMP communities and public IP addresses** from anything you paste.
+        A security problem goes [here instead](https://github.com/chrischarrisofficial-tech/oneconfig/security/advisories/new).
+  - type: textarea
+    id: what
+    attributes:
+      label: What happened
+      description: What you did, what you expected, and what OneConfig did instead.
+    validations:
+      required: true
+  - type: textarea
+    id: steps
+    attributes:
+      label: Steps to reproduce
+      placeholder: |
+        1. Load the campus example
+        2. Select CORE-SW1 and open the Config tab
+        3. ...
+    validations:
+      required: true
+  - type: dropdown
+    id: where
+    attributes:
+      label: Where
+      multiple: true
+      options: [Builder or map, Generated config, Audit or STIG, Discovery, Push or rollback, CVE lookup, Advisor, Accounts or audit log, Mac app, Command line, Other]
+    validations:
+      required: true
+  - type: dropdown
+    id: os
+    attributes:
+      label: Device OS involved
+      multiple: true
+      options: [None, Cisco IOS-XE, Cisco NX-OS, Arista EOS, Juniper Junos, Cisco ASA, Palo Alto PAN-OS, Fortinet FortiOS]
+  - type: input
+    id: device
+    attributes:
+      label: Device model and software version
+      placeholder: e.g. Catalyst 9300, IOS-XE 17.9.4a
+  - type: input
+    id: version
+    attributes:
+      label: OneConfig version or commit
+      placeholder: e.g. v0.1.0, or the commit from git log -1
+    validations:
+      required: true
+  - type: input
+    id: system
+    attributes:
+      label: Your computer
+      placeholder: e.g. macOS 15 (Intel), Windows 11, Ubuntu 24.04; browser or the Mac app
+    validations:
+      required: true
+  - type: textarea
+    id: logs
+    attributes:
+      label: Error messages, push log or config excerpt
+      description: Paste text, not screenshots. Remove secrets first.
+      render: text

@@ -2,6 +2,8 @@
 
 Draw your network, click a device, and get a hardened Cisco IOS-XE, Cisco NX-OS, Arista EOS or Juniper Junos config, or a Cisco ASA, Palo Alto PAN-OS or Fortinet FortiGate firewall config, with a live security score.
 
+![OneConfig's dashboard: the campus example network on the topology map, with network health, findings and the selected switch's settings](docs/screenshot.png)
+
 ## Run it
 
 ```bash
