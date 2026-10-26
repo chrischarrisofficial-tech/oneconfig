@@ -11,6 +11,18 @@ oneconfig serve           # opens OneConfig in your browser (http://127.0.0.1:84
 
 Works the same on Windows, macOS and Linux. The server only listens on 127.0.0.1 and rejects requests from any other host name. Each launch also makes a random access key that every request must carry. The browser gets it from `~/.oneconfig/open.html`, a page only your account can read, so another account or program on the same computer (a shared jump host, say) can't use the server or your saved logins. With `--no-browser`, open the `file://` link it prints. A tab opened at the plain address has no key and says so.
 
+### Mac app
+
+`OneConfig.app` runs the same server and shows it in its own window, so there's no browser tab or launch link. Your data stays in `~/.oneconfig` and the Keychain, shared with `oneconfig serve`. To build it:
+
+```bash
+pip install -e ".[app]"
+pyinstaller packaging/OneConfig.spec --noconfirm   # makes dist/OneConfig.app
+dist/OneConfig.app/Contents/MacOS/OneConfig --selfcheck   # checks the packed app has its templates, parsers and keychain access
+```
+
+The app isn't signed, so the first time you open it, right-click it and choose **Open**. macOS asks once for Local Network access: allow it, or discovery and pushes can't reach your devices. An app built on an Intel Mac runs on Apple Silicon through Rosetta.
+
 ## Using the builder
 
 - **Command rail** (left edge): Build places a router, L3 switch, switch or firewall. Connect links two devices, picks the next free ports, and can auto-assign a /30 or /31. Audit checks any pasted `show running-config`. File saves, opens and exports.

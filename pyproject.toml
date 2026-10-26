@@ -7,6 +7,7 @@ dependencies = ["jinja2>=3.1", "pydantic>=2.6"]
 
 [project.optional-dependencies]
 discover = ["netmiko>=4.4", "pysnmp>=7.1", "pyserial>=3.5", "keyring>=24", "cryptography>=42"]  # Discover and Push (cryptography: encrypted backups)
+app = ["pywebview>=5", "pyinstaller>=6", "oneconfig[discover]"]  # the macOS app: packaging/OneConfig.spec
 dev = ["pytest", "snmpsim>=1.2", "pysmi", "playwright", "oneconfig[discover]"]
 
 [project.scripts]
