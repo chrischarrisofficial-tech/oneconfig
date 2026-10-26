@@ -517,7 +517,7 @@ def _fortios_apply(c, cmds, host, planned, minutes, log):
         r += c.send_command_timing("y", read_timeout=60) if "(y/n)" in r else ""
         revert.rebooting = "(y/n)" in r and not FORTI_ERROR.search(r)  # read by _apply_device's fail()
         if not revert.rebooting:
-            return (f"{why} execute cfg reload didn't run ({" ".join(r.split())[-120:]}), so the change is still live until the "
+            return (f"{why} execute cfg reload didn't run ({' '.join(r.split())[-120:]}), so the change is still live until the "
                     f"{secs} second revert timer reboots the firewall. Then set cfg-save automatic under config system global.")
         return f"{why} The firewall is rebooting to its saved configuration, which undoes the change."
     return snapshot, out + r, confirm, revert
