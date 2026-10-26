@@ -317,4 +317,12 @@ Adding a vendor means adding a template plus its interface naming. The model sta
 6. ~~Cisco NX-OS and Arista EOS~~ (generate, audit, STIG, discover, push)
 7. ~~Juniper Junos~~ (generate, audit, STIG, discover, CVE, push)
 8. Firewalls: ~~Cisco ASA~~ (generate, audit, STIG, discover, CVE, plan-only push; FTD audited), ~~Palo Alto~~ (generate, audit, sunset STIG, discover, CVE, push), ~~FortiGate~~ (generate, audit, STIG, discover, CVE, push under the revert timer). VPN deferred
-9. Tauri desktop installer
+9. ~~Desktop app~~ (macOS, `packaging/OneConfig.spec`); Windows build next
+
+## Security
+
+OneConfig changes live network devices. Try it against lab equipment before production. To report a vulnerability, see [SECURITY.md](SECURITY.md); please don't open a public issue for one.
+
+## License
+
+MIT, see [LICENSE](LICENSE). Third-party material and its licenses are listed in [NOTICE](NOTICE).
