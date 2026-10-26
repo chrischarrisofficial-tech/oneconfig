@@ -1,0 +1,40 @@
+fpc0:
+-------------------------------------------------------------------------
+Hostname: JUN-EDGE1
+Model: mx240
+Junos: 21.4R3-S5.4
+JUNOS Base OS boot [21.4R3-S5.4]
+JUNOS Base OS Software Suite [21.4R3-S5.4]
+JUNOS Kernel Software Suite [21.4R3-S5.4]
+JUNOS Crypto Software Suite [21.4R3-S5.4]
+JUNOS Packet Forwarding Engine Support (M/T/EX Common) [21.4R3-S5.4]
+JUNOS Packet Forwarding Engine Support (MX Common) [21.4R3-S5.4]
+JUNOS Online Documentation [121.4R3-S5.4]
+JUNOS Services AACL Container package [21.4R3-S5.4]
+JUNOS Services Application Level Gateways [21.4R3-S5.4]
+JUNOS AppId Services [21.4R3-S5.4]
+JUNOS Border Gateway Function package [21.4R3-S5.4]
+JUNOS Services Captive Portal and Content Delivery Container package [21.4R3-S5.4]
+JUNOS Services HTTP Content Management package [21.4R3-S5.4]
+JUNOS IDP Services [21.4R3-S5.4]
+JUNOS Services Jflow Container package [21.4R3-S5.4]
+JUNOS Services LL-PDF Container package [21.4R3-S5.4]
+JUNOS Services MobileNext Software package [21.4R3-S5.4]
+JUNOS Services Mobile Subscriber Service Container package [21.4R3-S5.4]
+JUNOS Services NAT [21.4R3-S5.4]
+JUNOS Services PTSP Container package [21.4R3-S5.4]
+JUNOS Services RPM [21.4R3-S5.4]
+JUNOS Services Stateful Firewall [21.4R3-S5.4]
+JUNOS Voice Services Container package [21.4R3-S5.4]
+JUNOS Services Crypto [21.4R3-S5.4]
+JUNOS Services SSL [21.4R3-S5.4]
+JUNOS Services IPSec [21.4R3-S5.4]
+JUNOS platform Software Suite [21.4R3-S5.4]
+JUNOS Runtime Software Suite [21.4R3-S5.4]
+JUNOS Routing Software Suite [21.4R3-S5.4]
+JUNOS py-base-i386 [21.4R3-S5.4]
+labpkg [7.0]
+Serial Number: qfsn-0123456789
+QFabric System ID: f158527a-f99e-11e0-9fbd-00e081c57cda
+
+{master:0}

@@ -1,0 +1,17 @@
+# PAN-OS lines the PAN-OS specs and Iron-Skillet don't show, checked against Palo Alto's own sources.
+# shape | source
+set shared authentication-profile V method local-database | PAN-OS CLI Quick Start, CLI Jump Start: "set shared authentication-profile"; parameters per pan-os-codegen specs/device/authentication-profile.yaml
+set shared authentication-profile V method tacplus server-profile V | same
+set shared authentication-profile V method radius server-profile V | same
+set shared authentication-profile V lockout failed-attempts V | same
+set shared authentication-profile V lockout lockout-time V | same
+set shared authentication-profile V allow-list all | same
+set deviceconfig high-availability enabled yes | pan-os-python panos/ha.py (HighAvailability, PAN-OS 8.1+ paths); CLI Jump Start: "set deviceconfig high-availability"
+set deviceconfig high-availability group group-id V | pan-os-python panos/ha.py: group/group-id
+set deviceconfig high-availability group peer-ip V | pan-os-python panos/ha.py: group/peer-ip
+set deviceconfig high-availability group mode active-passive | pan-os-python panos/ha.py: group/mode/{mode}
+set deviceconfig high-availability group configuration-synchronization enabled yes | pan-os-python panos/ha.py: group/configuration-synchronization/enabled
+set deviceconfig high-availability group election-option device-priority V | live.paloaltonetworks.com "Configure HA1/HA2 command line" (set deviceconfig high-availability group group-id 1 election-option device-priority 100)
+set deviceconfig high-availability interface ha1 port V | pan-os-python panos/ha.py: interface/ha1 (port); same community post
+set deviceconfig high-availability interface ha1 ip-address V | pan-os-python panos/ha.py: interface/ha1 (ip-address); same community post
+set deviceconfig high-availability interface ha1 netmask V | pan-os-python panos/ha.py: interface/ha1 (netmask); same community post

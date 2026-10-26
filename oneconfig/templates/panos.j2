@@ -1,0 +1,334 @@
+{#- PAN-OS in `set` form (configure mode), single vsys, legacy virtual router "default". The settings follow DISA's
+    Palo Alto Networks NDM, ALG and IDPS STIGs; the syntax follows Palo Alto's own specs and Iron-Skillet configs. #}
+{% set aaa = s.tacacs_servers or s.radius_servers %}
+{% set routed = d.interfaces | selectattr("ip") | list %}
+{% set rid = (d.ospf.router_id if d.ospf and d.ospf.router_id else none) or (d.bgp.router_id if d.bgp and d.bgp.router_id else none) %}
+## OneConfig | {{ net.name }} | {{ d.hostname }} (firewall, PAN-OS)
+## Replace every <ANGLE-BRACKET> placeholder before deploying. OneConfig hashes <...SHA256> values itself.
+set deviceconfig system hostname {{ d.hostname }}
+set deviceconfig system domain {{ s.domain }}
+set deviceconfig system timezone UTC
+set deviceconfig system login-banner {{ q(dod_banner.replace("\n", " ") if s.dod_banner else s.banner) }}
+{% for n in s.ntp_servers[:2] %}
+{% set which = "primary-ntp-server" if loop.first else "secondary-ntp-server" %}
+set deviceconfig system ntp-servers {{ which }} ntp-server-address {{ n }}
+set deviceconfig system ntp-servers {{ which }} authentication-type symmetric-key key-id {{ loop.index }}
+set deviceconfig system ntp-servers {{ which }} authentication-type symmetric-key algorithm sha1 authentication-key <NTP-KEY>
+{% endfor %}
+{% if s.snmpv3 %}
+## SNMPv3 only (STIG PANW-NM-000118). Add the v3 view and user under Device > Setup > Operations > SNMP Setup.
+set deviceconfig system snmp-setting access-setting version v3
+{% endif %}
+## Content updates (STIG PANW-AG-000060, PANW-IP-000024)
+set deviceconfig system update-schedule threats recurring every-30-mins at 2
+set deviceconfig system update-schedule threats recurring every-30-mins action download-and-install
+set deviceconfig system update-schedule anti-virus recurring hourly at 4
+set deviceconfig system update-schedule anti-virus recurring hourly action download-and-install
+set deviceconfig system update-schedule wildfire recurring real-time
+set deviceconfig setting management idle-timeout 10
+set deviceconfig setting management enable-log-high-dp-load yes
+set mgt-config password-complexity enabled yes
+set mgt-config password-complexity minimum-length 15
+set mgt-config password-complexity minimum-uppercase-letters 1
+set mgt-config password-complexity minimum-lowercase-letters 1
+set mgt-config password-complexity minimum-numeric-letters 1
+set mgt-config password-complexity minimum-special-characters 1
+set mgt-config password-complexity new-password-differs-by-characters 8
+set mgt-config password-complexity block-username-inclusion yes
+set mgt-config password-complexity password-history-count 24
+## Local account of last resort: its authentication profile locks it after 3 failures until an admin unlocks it
+set shared local-user-database user <ADMIN-USER> phash {{ q("<ADMIN-SECRET.SHA256>") }}
+set shared authentication-profile LAST-RESORT method local-database
+set shared authentication-profile LAST-RESORT lockout failed-attempts 3
+set shared authentication-profile LAST-RESORT lockout lockout-time 0
+set shared authentication-profile LAST-RESORT allow-list all
+set mgt-config users <ADMIN-USER> authentication-profile LAST-RESORT
+set mgt-config users <ADMIN-USER> permissions role-based superuser yes
+{% for t in s.tacacs_servers %}
+set shared server-profile tacplus TACACS-SERVERS server TACACS-{{ loop.index }} address {{ t }}
+set shared server-profile tacplus TACACS-SERVERS server TACACS-{{ loop.index }} secret <TACACS-KEY>
+{% endfor %}
+{% if s.tacacs_servers %}
+set shared server-profile tacplus TACACS-SERVERS protocol CHAP
+{% endif %}
+{% for r in s.radius_servers if not s.tacacs_servers %}
+set shared server-profile radius RADIUS-SERVERS server RADIUS-{{ loop.index }} ip-address {{ r }}
+set shared server-profile radius RADIUS-SERVERS server RADIUS-{{ loop.index }} secret <RADIUS-KEY>
+{% endfor %}
+{% if aaa %}
+## Remote administrators: select REMOTE-ADMIN under Device > Setup > Management > Authentication Settings
+{% if s.tacacs_servers %}
+set shared authentication-profile REMOTE-ADMIN method tacplus server-profile TACACS-SERVERS
+{% else %}
+set shared authentication-profile REMOTE-ADMIN method radius server-profile RADIUS-SERVERS
+{% endif %}
+set shared authentication-profile REMOTE-ADMIN lockout failed-attempts 3
+set shared authentication-profile REMOTE-ADMIN lockout lockout-time 0
+set shared authentication-profile REMOTE-ADMIN allow-list all
+{% endif %}
+{% for l in s.syslog_servers %}
+set shared log-settings syslog SYSLOG-SERVERS server SYSLOG-{{ loop.index }} server {{ l }}
+set shared log-settings syslog SYSLOG-SERVERS server SYSLOG-{{ loop.index }} transport UDP
+set shared log-settings syslog SYSLOG-SERVERS server SYSLOG-{{ loop.index }} port 514
+set shared log-settings syslog SYSLOG-SERVERS server SYSLOG-{{ loop.index }} format BSD
+set shared log-settings syslog SYSLOG-SERVERS server SYSLOG-{{ loop.index }} facility LOG_USER
+{% endfor %}
+{% if s.syslog_servers %}
+set shared log-settings system match-list ALL-SYSTEM filter "All Logs"
+set shared log-settings system match-list ALL-SYSTEM send-syslog SYSLOG-SERVERS
+set shared log-settings config match-list ALL-CONFIG filter "All Logs"
+set shared log-settings config match-list ALL-CONFIG send-syslog SYSLOG-SERVERS
+{% for t in ("traffic", "threat", "wildfire", "url", "auth") %}
+set shared log-settings profiles default match-list {{ t | upper }} log-type {{ t }}
+set shared log-settings profiles default match-list {{ t | upper }} filter "All Logs"
+set shared log-settings profiles default match-list {{ t | upper }} send-syslog SYSLOG-SERVERS
+{% endfor %}
+{% endif %}
+## Security profiles (STIG PANW-IP-000001, -000008): block critical/high/medium threats with packet capture, sinkhole malicious DNS
+set profiles virus ONECONFIG-AV packet-capture yes
+{% for dec in ("ftp", "http", "http2", "imap", "pop3", "smb", "smtp") %}
+set profiles virus ONECONFIG-AV decoder {{ dec }} action reset-both
+set profiles virus ONECONFIG-AV decoder {{ dec }} wildfire-action reset-both
+{% endfor %}
+set profiles spyware ONECONFIG-AS botnet-domains lists default-paloalto-dns action sinkhole
+set profiles spyware ONECONFIG-AS botnet-domains lists default-paloalto-dns packet-capture single-packet
+set profiles spyware ONECONFIG-AS botnet-domains sinkhole ipv4-address pan-sinkhole-default-ip
+set profiles spyware ONECONFIG-AS botnet-domains sinkhole ipv6-address ::1
+{% for kind in ("spyware ONECONFIG-AS", "vulnerability ONECONFIG-VP") %}
+set profiles {{ kind }} rules BLOCK-CRIT-HIGH-MED action reset-both
+set profiles {{ kind }} rules BLOCK-CRIT-HIGH-MED severity [ critical high medium ]
+set profiles {{ kind }} rules BLOCK-CRIT-HIGH-MED threat-name any
+set profiles {{ kind }} rules BLOCK-CRIT-HIGH-MED category any
+set profiles {{ kind }} rules BLOCK-CRIT-HIGH-MED packet-capture extended-capture
+set profiles {{ kind }} rules DEFAULT-LOW-INFO action default
+set profiles {{ kind }} rules DEFAULT-LOW-INFO severity [ low informational ]
+set profiles {{ kind }} rules DEFAULT-LOW-INFO threat-name any
+set profiles {{ kind }} rules DEFAULT-LOW-INFO category any
+set profiles {{ kind }} rules DEFAULT-LOW-INFO packet-capture disable
+{% endfor %}
+{% for r in ("BLOCK-CRIT-HIGH-MED", "DEFAULT-LOW-INFO") %}
+set profiles vulnerability ONECONFIG-VP rules {{ r }} vendor-id any
+set profiles vulnerability ONECONFIG-VP rules {{ r }} cve any
+set profiles vulnerability ONECONFIG-VP rules {{ r }} host any
+{% endfor %}
+set profile-group ONECONFIG virus ONECONFIG-AV
+set profile-group ONECONFIG spyware ONECONFIG-AS
+set profile-group ONECONFIG vulnerability ONECONFIG-VP
+## DoS protection profile (STIG PANW-IP-000018) and zone protection on every zone (PANW-AG-000102, -000050, PANW-IP-000030)
+set profiles dos-protection ONECONFIG-DOS type classified
+{% for f in ("udp", "icmp", "icmpv6", "other-ip") %}
+set profiles dos-protection ONECONFIG-DOS flood {{ f }} enable yes
+set profiles dos-protection ONECONFIG-DOS flood {{ f }} red alarm-rate 10000
+set profiles dos-protection ONECONFIG-DOS flood {{ f }} red activate-rate 10000
+set profiles dos-protection ONECONFIG-DOS flood {{ f }} red maximal-rate 40000
+set profiles dos-protection ONECONFIG-DOS flood {{ f }} red block duration 300
+{% endfor %}
+set profiles dos-protection ONECONFIG-DOS flood tcp-syn enable yes
+set profiles dos-protection ONECONFIG-DOS flood tcp-syn red alarm-rate 10000
+set profiles dos-protection ONECONFIG-DOS flood tcp-syn red activate-rate 10000
+set profiles dos-protection ONECONFIG-DOS flood tcp-syn red maximal-rate 40000
+set profiles dos-protection ONECONFIG-DOS flood tcp-syn red block duration 300
+{% for f in ("tcp-syn", "udp", "icmp", "icmpv6", "other-ip") %}
+set network profiles zone-protection-profile ONECONFIG-ZP flood {{ f }} enable yes
+set network profiles zone-protection-profile ONECONFIG-ZP flood {{ f }} red alarm-rate 10000
+set network profiles zone-protection-profile ONECONFIG-ZP flood {{ f }} red activate-rate 10000
+set network profiles zone-protection-profile ONECONFIG-ZP flood {{ f }} red maximal-rate 40000
+{% endfor %}
+{% for opt in ("discard-ip-spoof", "discard-malformed-option", "discard-strict-source-routing", "discard-loose-source-routing", "discard-record-route", "discard-timestamp", "discard-unknown-option", "discard-icmp-error") %}
+set network profiles zone-protection-profile ONECONFIG-ZP {{ opt }} yes
+{% endfor %}
+{% for scan in (8001, 8002, 8003) %}
+set network profiles zone-protection-profile ONECONFIG-ZP scan {{ scan }} action block-ip track-by source
+set network profiles zone-protection-profile ONECONFIG-ZP scan {{ scan }} action block-ip duration 300
+set network profiles zone-protection-profile ONECONFIG-ZP scan {{ scan }} interval 2
+set network profiles zone-protection-profile ONECONFIG-ZP scan {{ scan }} threshold 100
+{% endfor %}
+set network profiles interface-management-profile ALLOW-PING ping yes
+{% for i in d.interfaces %}
+{% if d.failover and i.name == d.failover.interface %}
+set network interface ethernet {{ i.name }} ha
+{% elif i.channel_group %}
+set network interface ethernet {{ i.name }} aggregate-group ae{{ i.channel_group }}
+{% elif i.ip %}
+{% set kind = "loopback units" if i.name.startswith("loopback.") else "tunnel units" if i.name.startswith("tunnel.") else none %}
+{% if kind %}
+set network interface {{ kind }} {{ i.name }} ip {{ i.ip }}
+{% if not i.external %}
+set network interface {{ kind }} {{ i.name }} interface-management-profile ALLOW-PING
+{% endif %}
+{% else %}
+{% set base = ("aggregate-ethernet " if i.name.startswith("ae") else "ethernet ") + i.name.split(".")[0] %}
+{% set unit = base + " layer3 units " + i.name if "." in i.name else base + " layer3" %}
+set network interface {{ unit }} ip {{ i.ip }}
+{% if "." in i.name %}
+set network interface {{ unit }} tag {{ i.name.split(".")[1] }}
+{% endif %}
+{% if not i.external %}
+set network interface {{ unit }} interface-management-profile ALLOW-PING
+{% endif %}
+{% if i.description %}
+set network interface {{ "aggregate-ethernet" if i.name.startswith("ae") else "ethernet" }} {{ i.name.split(".")[0] }} comment {{ q(i.description) }}
+{% endif %}
+{% if i.shutdown %}
+set network interface ethernet {{ i.name }} link-state down
+{% endif %}
+{% endif %}
+{% endif %}
+{% endfor %}
+{% for z in d.zones %}
+{% set members = d.interfaces | selectattr("zone", "equalto", z.name) | map(attribute="name") | list %}
+{% if members %}
+set zone {{ z.name }} network layer3 {{ lst(members) }}
+set zone {{ z.name }} network zone-protection-profile ONECONFIG-ZP
+{% endif %}
+{% endfor %}
+{% if routed %}
+set network virtual-router default interface {{ lst(routed | map(attribute="name") | list) }}
+{% endif %}
+{% for r in d.static_routes %}
+set network virtual-router default routing-table ip static-route {{ r.name or "ROUTE-" ~ loop.index }} destination {{ r.prefix }}
+set network virtual-router default routing-table ip static-route {{ r.name or "ROUTE-" ~ loop.index }} nexthop ip-address {{ r.next_hop }}
+{% endfor %}
+{% if d.ospf %}
+{% set ospf = "set network virtual-router default protocol ospf" %}
+{{ ospf }} enable yes
+{% if rid %}
+{{ ospf }} router-id {{ rid }}
+{% endif %}
+{% if d.ospf.authenticate %}
+{{ ospf }} auth-profile OSPF-AUTH md5 1 key <OSPF-KEY>
+{{ ospf }} auth-profile OSPF-AUTH md5 1 preferred yes
+{% endif %}
+{% for i in d.interfaces if i.ospf_area is not none %}
+{{ ospf }} area {{ area_id(i.ospf_area) }} type normal
+{{ ospf }} area {{ area_id(i.ospf_area) }} interface {{ i.name }} enable yes
+{{ ospf }} area {{ area_id(i.ospf_area) }} interface {{ i.name }} passive {{ "yes" if i.routing_passive else "no" }}
+{% if d.ospf.authenticate %}
+{{ ospf }} area {{ area_id(i.ospf_area) }} interface {{ i.name }} authentication OSPF-AUTH
+{% endif %}
+{% endfor %}
+{% endif %}
+{% if d.bgp %}
+{% set bgp = "set network virtual-router default protocol bgp" %}
+{{ bgp }} enable yes
+{{ bgp }} local-as {{ d.bgp.asn }}
+{% if rid %}
+{{ bgp }} router-id {{ rid }}
+{% endif %}
+{{ bgp }} install-route yes
+{{ bgp }} enforce-first-as yes
+{% if d.bgp.neighbors | selectattr("authenticate") | list %}
+{{ bgp }} auth-profile BGP-AUTH secret <BGP-KEY>
+{% endif %}
+{% for n in d.bgp.neighbors %}
+{% set grp = "IBGP" if n.remote_as == d.bgp.asn else "EBGP" %}
+{% set peer = bgp ~ " peer-group " ~ grp ~ " peer PEER-" ~ n.ip | string | replace(".", "-") %}
+{{ bgp }} peer-group {{ grp }} type {{ "ibgp" if grp == "IBGP" else "ebgp" }}
+{{ bgp }} peer-group {{ grp }} enable yes
+{{ peer }} peer-as {{ n.remote_as }}
+{{ peer }} peer-address ip {{ n.ip }}
+{% set src = src_if(n.ip) %}
+{% if src %}
+{{ peer }} local-address interface {{ src.name }}
+{{ peer }} local-address ip {{ src.ip }}
+{% endif %}
+{% if n.authenticate %}
+{{ peer }} connection-options authentication BGP-AUTH
+{% endif %}
+{% if n.max_prefix %}
+{{ peer }} max-prefixes {{ n.max_prefix }}
+{% endif %}
+{{ peer }} enable yes
+{% endfor %}
+{% if ebgp %}
+{% for b in bogons %}
+{{ bgp }} policy import rules DENY-BOGONS match address-prefix {{ b }} exact no
+{% endfor %}
+{{ bgp }} policy import rules DENY-BOGONS used-by EBGP
+{{ bgp }} policy import rules DENY-BOGONS action deny
+{{ bgp }} policy import rules DENY-BOGONS enable yes
+{% endif %}
+{% for n in d.bgp.networks %}
+set network virtual-router default protocol redist-profile ADVERTISE filter type connect
+set network virtual-router default protocol redist-profile ADVERTISE filter destination {{ n }}
+{% endfor %}
+{% if d.bgp.networks %}
+set network virtual-router default protocol redist-profile ADVERTISE priority 1
+set network virtual-router default protocol redist-profile ADVERTISE action redist
+{{ bgp }} redist-rules ADVERTISE enable yes
+{{ bgp }} redist-rules ADVERTISE set-origin igp
+{% endif %}
+{% endif %}
+{% for x in svc_objects %}
+set service {{ x.name }} protocol {{ x.protocol }} port {{ x.ports }}
+{% endfor %}
+{% for name, members in svc_groups %}
+set service-group {{ name }} members {{ lst(members) }}
+{% endfor %}
+{% for a in d.addresses %}
+set address {{ a.name }} ip-netmask {{ a.value.network_address if a.value.prefixlen == 32 else a.value }}
+{% endfor %}
+{% for g in d.address_groups %}
+set address-group {{ g.name }} static {{ lst(g.members) }}
+{% endfor %}
+{% if external_zones and internal_zones %}
+## Block ICMP probes and traceroute from untrusted zones (STIG PANW-AG-000127)
+{% set r = "set rulebase security rules BLOCK-ICMP-PROBES" %}
+{{ r }} from {{ lst(external_zones) }}
+{{ r }} to {{ lst(internal_zones) }}
+{{ r }} source any
+{{ r }} destination any
+{{ r }} application [ icmp ipv6-icmp traceroute ]
+{{ r }} service application-default
+{{ r }} action deny
+{{ r }} log-end yes
+{{ r }} log-setting default
+{% endif %}
+{% for x in sec_rules %}
+{% set r = "set rulebase security rules " ~ x.name %}
+{{ r }} from {{ x.from }}
+{{ r }} to {{ x.to }}
+{{ r }} source {{ lst(x.source) }}
+{{ r }} destination {{ lst(x.destination) }}
+{{ r }} application {{ lst(x.application) }}
+{{ r }} service {{ lst(x.service) }}
+{{ r }} action {{ x.action }}
+{{ r }} log-end {{ "yes" if x.log else "no" }}
+{% if x.log %}
+{{ r }} log-setting default
+{% endif %}
+{% if x.action == "allow" %}
+{{ r }} profile-setting group ONECONFIG
+{% endif %}
+{% endfor %}
+## Everything not allowed above is denied and logged (STIG PANW-AG-000051, PANW-AG-000024)
+set rulebase default-security-rules rules interzone-default action deny
+set rulebase default-security-rules rules interzone-default log-end yes
+set rulebase default-security-rules rules interzone-default log-setting default
+set rulebase default-security-rules rules intrazone-default log-end yes
+set rulebase default-security-rules rules intrazone-default log-setting default
+{% for x in nat_rules %}
+{% set r = "set rulebase nat rules " ~ x.name %}
+{{ r }} from {{ x.from }}
+{{ r }} to {{ x.to }}
+{{ r }} source {{ x.source }}
+{{ r }} destination {{ x.destination }}
+{{ r }} service {{ x.service }}
+{% for t in x.xlate %}
+{{ r }} {{ t }}
+{% endfor %}
+{% endfor %}
+{% if d.failover %}
+{% set f = d.failover %}
+## Active/passive pair: one HA1 link (control and configuration sync). Add an HA2 link to sync sessions too.
+set deviceconfig high-availability enabled yes
+set deviceconfig high-availability group group-id 1
+set deviceconfig high-availability group peer-ip {{ f.peer_ip }}
+set deviceconfig high-availability group mode active-passive
+set deviceconfig high-availability group configuration-synchronization enabled yes
+set deviceconfig high-availability group election-option device-priority {{ 100 if f.unit == "primary" else 110 }}
+set deviceconfig high-availability interface ha1 port {{ f.interface }}
+set deviceconfig high-availability interface ha1 ip-address {{ f.ip.ip }}
+set deviceconfig high-availability interface ha1 netmask {{ f.ip.netmask }}
+## On the peer: the same lines with ip-address {{ f.peer_ip }}, peer-ip {{ f.ip.ip }} and device-priority {{ 110 if f.unit == "primary" else 100 }}
+{% endif %}

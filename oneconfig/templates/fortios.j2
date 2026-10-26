@@ -1,0 +1,455 @@
+{#- FortiOS 7.4.4 and later, single VDOM. The settings follow DISA's FortiGate Firewall NDM and Firewall STIGs; the
+    syntax follows Fortinet's own configuration schema. Central NAT is on, so policies match real addresses. #}
+{% set routed = d.interfaces | selectattr("ip") | list %}
+{% set rid = (d.ospf.router_id if d.ospf and d.ospf.router_id else none) or (d.bgp.router_id if d.bgp and d.bgp.router_id else none) or (routed[0].ip.ip if routed else none) %}
+#### OneConfig | {{ net.name }} | {{ d.hostname }} (firewall, FortiOS)
+#### Replace every <ANGLE-BRACKET> placeholder before deploying.
+config system global
+    set hostname {{ q(d.hostname) }}
+    set admintimeout 10
+    set admin-lockout-threshold 3
+    set admin-lockout-duration 900
+    set admin-concurrent disable
+    set pre-login-banner enable
+    set cli-audit-log enable
+    set revision-backup-on-logout enable
+    set admin-https-ssl-versions tlsv1-2 tlsv1-3
+    set ssl-min-proto-version TLSv1-2
+    set strong-crypto enable
+    set admin-ssh-v1 disable
+    set admin-telnet disable
+    set av-failopen off
+    set av-failopen-session disable
+end
+config system replacemsg admin "pre_admin-disclaimer-text"
+    set buffer {{ q(dod_banner.replace("\n", " ") if s.dod_banner else s.banner) }}
+end
+config system settings
+    set central-nat enable
+    set asymroute disable
+    set asymroute-icmp disable
+    set asymroute6 disable
+end
+config ips global
+    set fail-open disable
+end
+config system password-policy
+    set status enable
+    set apply-to admin-password
+    set minimum-length 15
+    set min-upper-case-letter 1
+    set min-lower-case-letter 1
+    set min-number 1
+    set min-non-alphanumeric 1
+end
+{% if s.ntp_servers %}
+config system ntp
+    set ntpsync enable
+    set type custom
+    set syncinterval 60
+    config ntpserver
+{% for n in s.ntp_servers %}
+        edit {{ loop.index }}
+            set server {{ q(n) }}
+            set authentication enable
+            set key-type SHA256
+            set key-id 1
+            set key {{ q("<NTP-KEY>") }}
+        next
+{% endfor %}
+    end
+end
+{% endif %}
+#### Local account of last resort, reachable only from the management network
+config system admin
+    edit {{ q("<ADMIN-USER>") }}
+        set accprofile "super_admin"
+        set password {{ q("<ADMIN-SECRET>") }}
+{% if s.mgmt_subnet %}
+        set trusthost1 {{ s.mgmt_subnet.network_address }} {{ s.mgmt_subnet.netmask }}
+{% endif %}
+    next
+{% if s.tacacs_servers or s.radius_servers %}
+    edit "REMOTE-ADMIN"
+        set remote-auth enable
+        set wildcard enable
+        set remote-group "REMOTE-ADMINS"
+        set accprofile "super_admin"
+{% if s.mgmt_subnet %}
+        set trusthost1 {{ s.mgmt_subnet.network_address }} {{ s.mgmt_subnet.netmask }}
+{% endif %}
+    next
+{% endif %}
+end
+{% if s.tacacs_servers %}
+config user tacacs+
+{% for t in s.tacacs_servers %}
+    edit "TACACS-{{ loop.index }}"
+        set server {{ q(t) }}
+        set key {{ q("<TACACS-KEY>") }}
+    next
+{% endfor %}
+end
+{% elif s.radius_servers %}
+config user radius
+{% for r in s.radius_servers %}
+    edit "RADIUS-{{ loop.index }}"
+        set server {{ q(r) }}
+        set secret {{ q("<RADIUS-KEY>") }}
+    next
+{% endfor %}
+end
+{% endif %}
+{% if s.tacacs_servers or s.radius_servers %}
+config user group
+    edit "REMOTE-ADMINS"
+        set member{% for x in (s.tacacs_servers or s.radius_servers) %} "{{ "TACACS" if s.tacacs_servers else "RADIUS" }}-{{ loop.index }}"{% endfor %}
+
+    next
+end
+{% endif %}
+{% if s.snmpv3 %}
+config system snmp sysinfo
+    set status enable
+end
+config system snmp user
+    edit {{ q("<SNMP-USER>") }}
+        set security-level auth-priv
+        set auth-proto sha256
+        set auth-pwd {{ q("<SNMP-AUTH-PASS>") }}
+        set priv-proto aes256
+        set priv-pwd {{ q("<SNMP-PRIV-PASS>") }}
+        set queries enable
+    next
+end
+{% endif %}
+#### Logging: every event category, implicit-deny traffic, local disk that overwrites when full (STIG FNFG-FW-000045)
+config log eventfilter
+    set event enable
+    set system enable
+    set user enable
+    set endpoint enable
+end
+config log setting
+    set user-anonymize disable
+    set fwpolicy-implicit-log enable
+end
+config log disk setting
+    set status enable
+    set diskfull overwrite
+    set max-log-file-size 100
+end
+{% for l in s.syslog_servers[:2] %}
+#### Syslog over TLS (STIG FNFG-FW-000050): the server must accept RFC 5425 syslog on TCP 6514
+config log {{ "syslogd" if loop.first else "syslogd2" }} setting
+    set status enable
+    set server {{ q(l) }}
+    set mode reliable
+    set port 6514
+    set enc-algorithm high
+end
+{% endfor %}
+config system interface
+{% for i in d.interfaces %}
+{% set kind = "aggregate" if i.name.startswith("agg") else "loopback" if i.name.startswith("loop") else none %}
+    edit {{ q(i.name) }}
+{% if kind %}
+        set vdom "root"
+        set type {{ kind }}
+{% endif %}
+{% if kind == "aggregate" %}
+        set member {{ lst(d.interfaces | selectattr("channel_group", "equalto", i.name[3:] | int) | map(attribute="name") | list) }}
+        set lacp-mode active
+{% endif %}
+{% if i.ip %}
+        set ip {{ i.ip.ip }} {{ i.ip.netmask }}
+{% if i.external %}
+        unset allowaccess
+{% else %}
+        set allowaccess ping
+{% endif %}
+        set role {{ "wan" if i.external else "lan" }}
+{% endif %}
+{% if i.description %}
+        set description {{ q(i.description) }}
+{% endif %}
+{% if kind != "loopback" %}
+{% for opt in ("dhcp-relay-service", "pptp-client", "arpforward", "broadcast-forward", "l2forward", "icmp-send-redirect", "vlanforward", "stpforward", "lldp-transmission") %}
+        set {{ opt }} disable
+{% endfor %}
+{% endif %}
+        set status {{ "down" if i.shutdown else "up" }}
+    next
+{% endfor %}
+end
+config system zone
+{% for z in d.zones %}
+{% set members = d.interfaces | selectattr("zone", "equalto", z.name) | map(attribute="name") | list %}
+{% if members %}
+    edit {{ q(z.name) }}
+        set interface {{ lst(members) }}
+        set intrazone deny
+    next
+{% endif %}
+{% endfor %}
+end
+{% if d.static_routes %}
+config router static
+{% for r in d.static_routes %}
+    edit {{ loop.index }}
+        set dst {{ r.prefix.network_address }} {{ r.prefix.netmask }}
+        set gateway {{ r.next_hop }}
+        set device {{ q(src_if(r.next_hop).name) }}
+{% if r.name %}
+        set comment {{ q(r.name) }}
+{% endif %}
+    next
+{% endfor %}
+end
+{% endif %}
+{% if d.ospf %}
+{% set ospf_ifs = d.interfaces | rejectattr("ospf_area", "none") | list %}
+config router ospf
+    set router-id {{ rid }}
+{% set passive = ospf_ifs | selectattr("routing_passive") | map(attribute="name") | list %}
+{% if passive %}
+    set passive-interface {{ lst(passive) }}
+{% endif %}
+    config area
+{% for a in ospf_ifs | map(attribute="ospf_area") | unique %}
+        edit {{ area_id(a) }}
+        next
+{% endfor %}
+    end
+{% if d.ospf.authenticate %}
+    config ospf-interface
+{% for i in ospf_ifs %}
+        edit {{ q(i.name) }}
+            set interface {{ q(i.name) }}
+            set authentication message-digest
+            config md5-keys
+                edit 1
+                    set key-string {{ q("<OSPF-KEY>") }}
+                next
+            end
+        next
+{% endfor %}
+    end
+{% endif %}
+    config network
+{% for i in ospf_ifs %}
+        edit {{ loop.index }}
+            set prefix {{ i.ip.network.network_address }} {{ i.ip.netmask }}
+            set area {{ area_id(i.ospf_area) }}
+        next
+{% endfor %}
+    end
+end
+{% endif %}
+{% if d.bgp %}
+{% if ebgp %}
+#### Bogon prefixes are never accepted from eBGP peers
+config router prefix-list
+    edit "DENY-BOGONS"
+        config rule
+{% for b in bogons %}
+            edit {{ loop.index }}
+                set action deny
+                set prefix {{ b.network_address }} {{ b.netmask }}
+                set le 32
+            next
+{% endfor %}
+            edit {{ bogons | length + 1 }}
+                set action permit
+                set prefix 0.0.0.0 0.0.0.0
+                set le 32
+            next
+        end
+    next
+end
+{% endif %}
+config router bgp
+    set as {{ d.bgp.asn }}
+{% if rid %}
+    set router-id {{ rid }}
+{% endif %}
+    config neighbor
+{% for n in d.bgp.neighbors %}
+        edit {{ q(n.ip) }}
+            set remote-as {{ n.remote_as }}
+{% if n.description %}
+            set description {{ q(n.description) }}
+{% endif %}
+{% if n.authenticate %}
+            set password {{ q("<BGP-KEY>") }}
+{% endif %}
+{% if n.remote_as != d.bgp.asn %}
+            set prefix-list-in "DENY-BOGONS"
+{% endif %}
+{% if n.max_prefix %}
+            set maximum-prefix {{ n.max_prefix }}
+{% endif %}
+{% if n.update_source %}
+            set update-source {{ q(n.update_source) }}
+{% endif %}
+        next
+{% endfor %}
+    end
+{% if d.bgp.networks %}
+    config network
+{% for p in d.bgp.networks %}
+        edit {{ loop.index }}
+            set prefix {{ p.network_address }} {{ p.netmask }}
+        next
+{% endfor %}
+    end
+{% endif %}
+end
+{% endif %}
+{% if d.addresses %}
+config firewall address
+{% for a in d.addresses %}
+    edit {{ q(a.name) }}
+        set subnet {{ a.value.network_address }} {{ a.value.netmask }}
+    next
+{% endfor %}
+end
+{% endif %}
+{% if d.address_groups %}
+config firewall addrgrp
+{% for g in d.address_groups %}
+    edit {{ q(g.name) }}
+        set member {{ lst(g.members) }}
+    next
+{% endfor %}
+end
+{% endif %}
+{% if d.services %}
+config firewall service custom
+{% for x in d.services %}
+    edit {{ q(x.name) }}
+{% if x.protocol == "icmp" %}
+        set protocol ICMP
+{% else %}
+{# the TCP/UDP protocol keyword differs between 7.4 and 7.6, and it is the default for a port service #}
+        set {{ x.protocol }}-portrange {{ x.ports }}
+{% endif %}
+    next
+{% endfor %}
+end
+{% endif %}
+{% if d.service_groups %}
+config firewall service group
+{% for g in d.service_groups %}
+    edit {{ q(g.name) }}
+        set member {{ lst(g.members) }}
+    next
+{% endfor %}
+end
+{% endif %}
+{% if nat_vips %}
+config firewall vip
+{% for v in nat_vips %}
+    edit {{ q(v.name) }}
+        set extip {{ v.extip }}
+        set mappedip {{ q(v.mappedip) }}
+        set extintf {{ q(v.extintf) }}
+{% if v.port %}
+        set portforward enable
+        set protocol {{ v.protocol }}
+        set extport {{ v.port }}
+        set mappedport {{ v.port }}
+{% endif %}
+    next
+{% endfor %}
+end
+{% endif %}
+{% if nat_pools %}
+config firewall ippool
+{% for p in nat_pools %}
+    edit {{ q(p.name) }}
+        set type {{ p.type }}
+        set startip {{ p.start }}
+        set endip {{ p.end }}
+    next
+{% endfor %}
+end
+{% endif %}
+{% if nat_snat %}
+config firewall central-snat-map
+{% for x in nat_snat %}
+    edit {{ loop.index }}
+        set srcintf {{ q(x.srcintf) }}
+        set dstintf {{ q(x.dstintf) }}
+        set orig-addr {{ q(x.orig) }}
+        set dst-addr "all"
+        set nat enable
+{% if x.pool %}
+        set nat-ippool {{ q(x.pool) }}
+{% endif %}
+        set comments {{ q(x.comment) }}
+    next
+{% endfor %}
+end
+{% endif %}
+#### DoS protection on every zone, inbound and outbound: floods, scans and sweeps are blocked and logged
+config firewall DoS-policy
+{% for z in d.zones if d.interfaces | selectattr("zone", "equalto", z.name) | list %}
+    edit {{ loop.index }}
+        set name {{ q("DOS-" ~ z.name) }}
+        set interface {{ q(z.name) }}
+        set srcaddr "all"
+        set dstaddr "all"
+        set service "ALL"
+        config anomaly
+{% for a, t in dos_anomalies %}
+            edit {{ q(a) }}
+                set status enable
+                set log enable
+                set action block
+                set threshold {{ t }}
+            next
+{% endfor %}
+        end
+    next
+{% endfor %}
+end
+#### Policies match top to bottom; anything not accepted here hits the implicit deny, which is logged
+config firewall policy
+{% for p in fw_policies %}
+    edit {{ p.id }}
+        set name {{ q(p.name) }}
+        set srcintf {{ q(p.srcintf) }}
+        set dstintf {{ q(p.dstintf) }}
+        set srcaddr {{ lst(p.srcaddr) }}
+        set dstaddr {{ lst(p.dstaddr) }}
+        set action {{ p.action }}
+        set schedule "always"
+        set service {{ lst(p.service) }}
+        set logtraffic {{ "all" if p.log else "disable" }}
+{% if p.action == "accept" %}
+        set utm-status enable
+        set ssl-ssh-profile "certificate-inspection"
+        set av-profile "default"
+        set ips-sensor "default"
+{% endif %}
+    next
+{% endfor %}
+end
+{% if d.failover %}
+{% set f = d.failover %}
+#### FGCP active/passive pair. The heartbeat link needs no addresses. On the peer: the same block with priority {{ 100 if f.unit == "primary" else 200 }}.
+config system ha
+    set group-name "ONECONFIG"
+    set mode a-p
+    set password {{ q("<HA-KEY>") }}
+    set hbdev {{ q(f.interface) }} 50
+    set session-pickup enable
+    set override disable
+    set priority {{ 200 if f.unit == "primary" else 100 }}
+{% set mon = routed | map(attribute="name") | list %}
+{% if mon %}
+    set monitor {{ lst(mon) }}
+{% endif %}
+end
+{% endif %}

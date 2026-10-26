@@ -1,0 +1,513 @@
+{#- Junos in "display set" form: one statement per line, the same form `show configuration | display set` prints,
+    so a diff against the device is a plain line comparison. Commands follow DISA's Juniper fix text. #}
+{% set aaa = s.tacacs_servers or s.radius_servers %}
+{% set lo = d.interfaces | selectattr("name", "equalto", "lo0") | first %}
+{% set rid = (d.ospf.router_id if d.ospf and d.ospf.router_id else none) or (d.bgp.router_id if d.bgp and d.bgp.router_id else none) %}
+{% set switching = d.role != 'router' %}
+{% set access_ports = d.interfaces | selectattr("mode", "equalto", "access") | rejectattr("channel_group") | list %}
+## OneConfig | {{ net.name }} | {{ d.hostname }} ({{ d.role }}, Junos)
+## Replace every <ANGLE-BRACKET> placeholder before deploying. OneConfig hashes <...SHA512> values itself.
+set system host-name {{ d.hostname }}
+set system domain-name {{ s.domain }}
+set system time-zone UTC
+set system no-redirects
+set system root-authentication encrypted-password "<ROOT-SECRET.SHA512>"
+{% if d.role == 'router' %}
+set system ports auxiliary disable
+{% endif %}
+set system ports console log-out-on-disconnect
+{% if switching %}
+set system rng hmac-drbg
+{% endif %}
+{# Login classes: every class times out after 5 minutes. ENGINEER (remote AAA users) can't touch logging or
+   software; AUDITOR may only change logging. The local account of last resort keeps full rights. #}
+{% for c in ("ONECONFIG-ADMIN", "ENGINEER", "AUDITOR") %}
+set system login class {{ c }} idle-timeout 5
+{% endfor %}
+set system login class ONECONFIG-ADMIN permissions all
+set system login class ENGINEER permissions all
+set system login class ENGINEER deny-commands "(file delete)|(request system software)"
+set system login class ENGINEER deny-configuration-regexps "system syslog .*"
+set system login class AUDITOR permissions configure
+set system login class AUDITOR permissions view
+set system login class AUDITOR permissions view-configuration
+set system login class AUDITOR allow-configuration-regexps "system syslog .*"
+## Local account of last resort, used only when the AAA servers don't answer
+set system login user <ADMIN-USER> class ONECONFIG-ADMIN
+set system login user <ADMIN-USER> authentication encrypted-password "<ADMIN-SECRET.SHA512>"
+{% if aaa %}
+set system login user remote class ENGINEER
+{% endif %}
+set system login retry-options tries-before-disconnect 3
+set system login retry-options lockout-period 15
+set system login password minimum-length 15
+set system login password minimum-upper-cases 1
+set system login password minimum-lower-cases 1
+set system login password minimum-numerics 1
+set system login password minimum-punctuations 1
+set system login password minimum-character-changes 8
+set system login password format sha512
+set system login message {{ q(dod_banner if s.dod_banner else s.banner) }}
+{% if s.tacacs_servers %}
+set system authentication-order tacplus
+{% endif %}
+{% if s.radius_servers %}
+set system authentication-order radius
+{% endif %}
+{% for t in s.tacacs_servers %}
+set system tacplus-server {{ t }} secret "<TACACS-KEY>"
+{% endfor %}
+{% for r in s.radius_servers %}
+set system radius-server {{ r }} secret "<RADIUS-KEY>"
+{% endfor %}
+{% if s.tacacs_servers %}
+set system accounting events login
+set system accounting events change-log
+set system accounting events interactive-commands
+set system accounting destination tacplus
+{% endif %}
+set system services ssh root-login deny
+set system services ssh protocol-version v2
+set system services ssh connection-limit 3
+set system services ssh max-sessions-per-connection 1
+set system services ssh ciphers aes256-ctr
+set system services ssh ciphers aes128-ctr
+set system services ssh macs hmac-sha2-512
+set system services ssh macs hmac-sha2-256
+set system services ssh key-exchange ecdh-sha2-nistp521
+set system services ssh key-exchange ecdh-sha2-nistp384
+set system services ssh key-exchange ecdh-sha2-nistp256
+set system syslog time-format year
+set system syslog time-format millisecond
+set system syslog file messages any info
+set system syslog file messages authorization info
+set system syslog file messages change-log info
+set system syslog file messages interactive-commands info
+set system syslog file messages firewall any
+set system syslog file messages archive size 1000000
+set system syslog file messages archive files 12
+set system syslog file messages archive no-world-readable
+{% for h in s.syslog_servers %}
+set system syslog host {{ h }} any info
+{% endfor %}
+{% if s.ntp_servers %}
+set system ntp authentication-key 1 type sha256
+set system ntp authentication-key 1 value "<NTP-KEY>"
+set system ntp trusted-key 1
+{% for n in s.ntp_servers %}
+set system ntp server {{ n }} key 1
+{% if loop.first %}
+set system ntp server {{ n }} prefer
+{% endif %}
+{% endfor %}
+{% endif %}
+{% if s.backup_server %}
+set system archival configuration transfer-on-commit
+set system archival configuration archive-sites "scp://<BACKUP-USER>@{{ s.backup_server }}:/oneconfig/{{ d.hostname }}" password "<BACKUP-PASS>"
+{% endif %}
+{% if ae_count %}
+set chassis aggregated-devices ethernet device-count {{ ae_count }}
+{% endif %}
+{% if s.snmpv3 %}
+set snmp v3 usm local-engine user <SNMP-USER> authentication-sha256 authentication-password "<SNMP-AUTH-PASS>"
+set snmp v3 usm local-engine user <SNMP-USER> privacy-aes128 privacy-password "<SNMP-PRIV-PASS>"
+set snmp v3 vacm security-to-group security-model usm security-name <SNMP-USER> group ONECONFIG-RO
+set snmp v3 vacm access group ONECONFIG-RO default-context-prefix security-model usm security-level privacy read-view ALL
+set snmp view ALL oid .1 include
+{% endif %}
+{% for i in d.interfaces %}
+{% set P = "set interfaces " ~ phys(i.name) %}
+{% set U = P ~ " unit " ~ unit_no(i.name) %}
+{% if i.description %}
+{{ U if i.name.startswith('irb.') else P }} description {{ q(i.description) }}
+{% endif %}
+{% if i.shutdown %}
+{{ U if i.name.startswith('irb.') else P }} disable
+{% endif %}
+{% if i.channel_group %}
+{{ P }} ether-options 802.3ad ae{{ i.channel_group }}
+{% elif i.mode == 'access' %}
+{{ U }} family ethernet-switching interface-mode access
+{{ U }} family ethernet-switching vlan members {{ vlan_name[s.parking_vlan] if i.shutdown else vlan_name.get(i.access_vlan or 1, i.access_vlan) }}
+{% if s.storm_control %}
+{{ U }} family ethernet-switching storm-control STORM-CONTROL
+{% endif %}
+{% elif i.mode == 'trunk' %}
+{% if i.name.startswith('ae') %}
+{{ P }} aggregated-ether-options lacp active
+{% endif %}
+{% if s.native_vlan %}
+{{ P }} native-vlan-id {{ s.native_vlan }}
+{% endif %}
+{{ U }} family ethernet-switching interface-mode trunk
+{% for v in trunk_vlans(i).split(',') %}
+{{ U }} family ethernet-switching vlan members {{ v }}
+{% endfor %}
+{% if s.native_vlan %}
+{{ U }} family ethernet-switching vlan members {{ s.native_vlan }}
+{% endif %}
+{% else %}
+{% if i.name.startswith('ae') %}
+{{ P }} aggregated-ether-options lacp active
+{% endif %}
+{% if i.ip %}
+{{ U }} family inet address {{ i.ip }}
+{% endif %}
+{% if not is_junos_mgmt(i.name) and i.name != 'lo0' %}
+{{ U }} family inet no-redirects
+{% if i.name in ctx.internal %}
+{{ U }} family inet rpf-check
+{% endif %}
+{% if acl_in(i) %}
+{{ U }} family inet filter input {{ acl_in(i) }}
+{% endif %}
+{% if acl_out(i) %}
+{{ U }} family inet filter output {{ acl_out(i) }}
+{% endif %}
+{% endif %}
+{% endif %}
+{% endfor %}
+{# The routing engine filter: every packet addressed to the device passes lo0's input filter. #}
+set interfaces lo0 unit 0 family inet filter input PROTECT-RE
+{% if switching %}
+{% for v in vlans if v.id != 1 %}
+set vlans {{ v.name }} vlan-id {{ v.id }}
+{% if v.id in irb_vlans %}
+set vlans {{ v.name }} l3-interface irb.{{ v.id }}
+{% endif %}
+{% endfor %}
+{% for vid in user_vlans.split(',') if vid and vlan_name.get(vid | int) %}
+{% set V = "set vlans " ~ vlan_name[vid | int] ~ " forwarding-options dhcp-security" %}
+{% if s.dhcp_snooping %}
+{{ V }}
+{% endif %}
+{% if s.arp_inspection %}
+{{ V }} arp-inspection
+{% endif %}
+{% if s.ip_source_guard %}
+{{ V }} ip-source-guard
+{% endif %}
+{% endfor %}
+set protocols rstp bpdu-block-on-edge
+{% for i in d.interfaces if not i.channel_group %}
+{% if i.mode == 'access' %}
+set protocols rstp interface {{ i.name }} edge
+{% elif i.mode == 'trunk' %}
+set protocols rstp interface {{ i.name }} {{ 'no-root-port' if i.name in ctx.downlinks else 'bpdu-timeout-action block' }}
+{% if not i.name.startswith('ae') %}
+set protocols oam ethernet link-fault-management interface {{ i.name }}
+{% endif %}
+{% endif %}
+{% endfor %}
+set protocols igmp-snooping vlan all
+{% if s.storm_control and access_ports %}
+set forwarding-options storm-control-profiles STORM-CONTROL all bandwidth-percentage 5
+{% endif %}
+{% if s.port_security and not s.dot1x %}
+{% for i in access_ports %}
+set switch-options interface {{ unit(i.name) }} interface-mac-limit 1
+set switch-options interface {{ unit(i.name) }} interface-mac-limit packet-action drop
+{% endfor %}
+{% endif %}
+{% if s.dot1x and access_ports %}
+{% for r in s.radius_servers %}
+set access radius-server {{ r }} secret "<RADIUS-KEY>"
+{% endfor %}
+set access profile DOT1X authentication-order radius
+{% for r in s.radius_servers %}
+set access profile DOT1X radius authentication-server {{ r }}
+{% endfor %}
+set protocols dot1x authenticator authentication-profile-name DOT1X
+{% for i in access_ports if not i.shutdown %}
+set protocols dot1x authenticator interface {{ unit(i.name) }} supplicant single-secure
+set protocols dot1x authenticator interface {{ unit(i.name) }} mac-radius
+{% endfor %}
+{% endif %}
+{% endif %}
+set protocols lldp interface all
+{% for i in d.interfaces if i.external %}
+set protocols lldp interface {{ i.name }} disable
+{% endfor %}
+{% for i in d.interfaces if i.dhcp_helper %}
+set forwarding-options dhcp-relay server-group DHCP-{{ i.dhcp_helper | string | replace('.', '-') }} {{ i.dhcp_helper }}
+set forwarding-options dhcp-relay group RELAY-{{ i.dhcp_helper | string | replace('.', '-') }} active-server-group DHCP-{{ i.dhcp_helper | string | replace('.', '-') }}
+set forwarding-options dhcp-relay group RELAY-{{ i.dhcp_helper | string | replace('.', '-') }} interface {{ unit(i.name) }}
+{% endfor %}
+{% if rid %}
+set routing-options router-id {{ rid }}
+{% endif %}
+{% if d.bgp %}
+set routing-options autonomous-system {{ d.bgp.asn }}
+{% endif %}
+{% for r in d.static_routes %}
+{% if r.next_hop | string | lower == 'null0' %}
+set routing-options static route {{ r.prefix }} discard
+{% else %}
+set routing-options static route {{ r.prefix }} next-hop {{ unit(r.next_hop | string) if r.next_hop is string and not r.next_hop[0].isdigit() else r.next_hop }}
+{% endif %}
+{% endfor %}
+{% if d.ospf %}
+set protocols ospf reference-bandwidth {{ d.ospf.reference_bw }}m
+{% for i in d.interfaces if d.ospf and i.ospf_area is not none %}
+set protocols ospf area {{ area_id(i.ospf_area) }} interface {{ unit(i.name) }}{{ '' if i.name in ospf_active else ' passive' }}
+{% if i.name in ospf_active and d.ospf.authenticate %}
+set protocols ospf area {{ area_id(i.ospf_area) }} interface {{ unit(i.name) }} authentication keychain OSPF-KEYS
+{% endif %}
+{% endfor %}
+{% if d.ospf.authenticate and ospf_active %}
+set security authentication-key-chains key-chain OSPF-KEYS key 1 secret "<OSPF-KEY>"
+set security authentication-key-chains key-chain OSPF-KEYS key 1 start-time {{ today.strftime('%Y-%m-%d') }}.00:00
+set security authentication-key-chains key-chain OSPF-KEYS key 1 algorithm hmac-sha-1
+{% endif %}
+{% endif %}
+{% if d.bgp %}
+{% if ebgp %}
+{% for b in bogons %}
+set policy-options prefix-list BOGONS {{ b }}
+{% endfor %}
+{% for p in d.bgp.networks %}
+set policy-options prefix-list OUR-PREFIXES {{ p }}
+{% endfor %}
+set policy-options policy-statement BGP-IN term REJECT-BOGONS from prefix-list-filter BOGONS orlonger
+set policy-options policy-statement BGP-IN term REJECT-BOGONS then reject
+{% if d.bgp.networks %}
+set policy-options policy-statement BGP-IN term REJECT-OURS from prefix-list-filter OUR-PREFIXES orlonger
+set policy-options policy-statement BGP-IN term REJECT-OURS then reject
+{% endif %}
+set policy-options policy-statement BGP-IN term NO-LONG-PREFIXES from route-filter 0.0.0.0/0 prefix-length-range /25-/32
+set policy-options policy-statement BGP-IN term NO-LONG-PREFIXES then reject
+set policy-options policy-statement BGP-IN term ACCEPT then accept
+{% if d.bgp.networks %}
+set policy-options policy-statement BGP-OUT term OURS from prefix-list OUR-PREFIXES
+set policy-options policy-statement BGP-OUT term OURS then accept
+{% endif %}
+set policy-options policy-statement BGP-OUT term REJECT-OTHER then reject
+{% elif d.bgp.networks %}
+{% for p in d.bgp.networks %}
+set policy-options prefix-list OUR-PREFIXES {{ p }}
+{% endfor %}
+{% endif %}
+{% if d.bgp.networks %}
+set policy-options policy-statement BGP-ORIGINATE term OURS from prefix-list OUR-PREFIXES
+set policy-options policy-statement BGP-ORIGINATE term OURS then accept
+{% endif %}
+set protocols bgp log-updown
+set protocols bgp enforce-first-as
+{% for n in d.bgp.neighbors %}
+{% set ext = n.remote_as != d.bgp.asn %}
+{% set G = "set protocols bgp group " ~ ("EBGP-AS" ~ n.remote_as if ext else "IBGP") %}
+{{ G }} type {{ 'external' if ext else 'internal' }}
+{% if ext %}
+{{ G }} peer-as {{ n.remote_as }}
+{{ G }} ttl 255
+{{ G }} import BGP-IN
+{{ G }} export BGP-OUT
+{% elif d.bgp.networks %}
+{{ G }} export BGP-ORIGINATE
+{% endif %}
+{% if n.description %}
+{{ G }} neighbor {{ n.ip }} description {{ q(n.description) }}
+{% endif %}
+{% if update_source(n) and ip_of.get(update_source(n)) %}
+{{ G }} neighbor {{ n.ip }} local-address {{ ip_of[update_source(n)] }}
+{% endif %}
+{% if n.authenticate %}
+{{ G }} neighbor {{ n.ip }} authentication-algorithm hmac-sha-1-96
+{{ G }} neighbor {{ n.ip }} authentication-key-chain BGP-AS{{ n.remote_as }}
+{% endif %}
+{% if ext and n.max_prefix %}
+{{ G }} neighbor {{ n.ip }} family inet unicast prefix-limit maximum {{ n.max_prefix }}
+{{ G }} neighbor {{ n.ip }} family inet unicast prefix-limit teardown 90
+{% endif %}
+{% endfor %}
+{% for asn in bgp_as %}
+set security authentication-key-chains key-chain BGP-AS{{ asn }} key 1 secret "<BGP-AS{{ asn }}-KEY>"
+set security authentication-key-chains key-chain BGP-AS{{ asn }} key 1 start-time {{ today.strftime('%Y-%m-%d') }}.00:00
+{% endfor %}
+{% endif %}
+{#- ------------------------------------------------------------ firewall filters -#}
+{% for p, rate, burst in (("CRITICAL", "4m", "16k"), ("IMPORTANT", "512k", "16k"), ("NORMAL", "64k", "2k"), ("UNDESIRABLE", "32k", "1500")) %}
+set firewall policer {{ p }} filter-specific
+set firewall policer {{ p }} if-exceeding bandwidth-limit {{ rate }}
+set firewall policer {{ p }} if-exceeding burst-size-limit {{ burst }}
+set firewall policer {{ p }} then discard
+{% endfor %}
+{% set F = "set firewall family inet filter PROTECT-RE term " %}
+{% if s.mgmt_subnet %}
+set policy-options prefix-list MGMT-NET {{ s.mgmt_subnet }}
+{% endif %}
+{% if s.ntp_servers %}
+{% for n in s.ntp_servers %}
+set policy-options prefix-list NTP-SERVERS {{ n }}/32
+{% endfor %}
+{% endif %}
+{% if s.radius_servers %}
+{% for r in s.radius_servers %}
+set policy-options prefix-list RADIUS-SERVERS {{ r }}/32
+{% endfor %}
+{% endif %}
+{% if d.bgp %}
+{% for n in d.bgp.neighbors %}
+set policy-options prefix-list BGP-PEERS {{ n.ip }}/32
+{% endfor %}
+{% endif %}
+{{ F }}ICMP-FRAGMENTS from protocol icmp
+{{ F }}ICMP-FRAGMENTS from is-fragment
+{{ F }}ICMP-FRAGMENTS then discard
+{{ F }}MASK-REQUEST from protocol icmp
+{{ F }}MASK-REQUEST from icmp-type mask-request
+{{ F }}MASK-REQUEST then discard
+{% if d.bgp %}
+{{ F }}BGP from source-prefix-list BGP-PEERS
+{{ F }}BGP from protocol tcp
+{{ F }}BGP from port bgp
+{{ F }}BGP then policer CRITICAL
+{{ F }}BGP then accept
+{% endif %}
+{% if d.ospf %}
+{{ F }}OSPF from protocol ospf
+{{ F }}OSPF then policer CRITICAL
+{{ F }}OSPF then accept
+{% endif %}
+{% if s.mgmt_subnet %}
+{{ F }}SSH from source-prefix-list MGMT-NET
+{% endif %}
+{{ F }}SSH from protocol tcp
+{{ F }}SSH from destination-port ssh
+{{ F }}SSH then policer IMPORTANT
+{{ F }}SSH then accept
+{% if s.mgmt_subnet %}
+{{ F }}DENY-SSH from protocol tcp
+{{ F }}DENY-SSH from destination-port ssh
+{{ F }}DENY-SSH then syslog
+{{ F }}DENY-SSH then discard
+{% endif %}
+{% if s.snmpv3 %}
+{% if s.mgmt_subnet %}
+{{ F }}SNMP from source-prefix-list MGMT-NET
+{% endif %}
+{{ F }}SNMP from protocol udp
+{{ F }}SNMP from destination-port snmp
+{{ F }}SNMP then policer IMPORTANT
+{{ F }}SNMP then accept
+{% endif %}
+{% if s.ntp_servers %}
+{{ F }}NTP from source-prefix-list NTP-SERVERS
+{{ F }}NTP from protocol udp
+{{ F }}NTP from port ntp
+{{ F }}NTP then policer IMPORTANT
+{{ F }}NTP then accept
+{% endif %}
+{% if s.radius_servers %}
+{{ F }}RADIUS from source-prefix-list RADIUS-SERVERS
+{{ F }}RADIUS from protocol udp
+{{ F }}RADIUS from source-port radius
+{{ F }}RADIUS then policer IMPORTANT
+{{ F }}RADIUS then accept
+{% endif %}
+{% if uses.relay %}
+{{ F }}DHCP-RELAY from protocol udp
+{{ F }}DHCP-RELAY from port bootps
+{{ F }}DHCP-RELAY from port bootpc
+{{ F }}DHCP-RELAY then policer IMPORTANT
+{{ F }}DHCP-RELAY then accept
+{% endif %}
+{% if switching %}
+{{ F }}IGMP from protocol igmp
+{{ F }}IGMP then policer NORMAL
+{{ F }}IGMP then accept
+{% endif %}
+{{ F }}ESTABLISHED from protocol tcp
+{{ F }}ESTABLISHED from tcp-established
+{{ F }}ESTABLISHED then policer IMPORTANT
+{{ F }}ESTABLISHED then accept
+{{ F }}ICMP from protocol icmp
+{{ F }}ICMP then policer NORMAL
+{{ F }}ICMP then accept
+{{ F }}DENY-ALL then syslog
+{{ F }}DENY-ALL then discard
+{% if needs_external_in %}
+{% set F = "set firewall family inet filter EXTERNAL-IN term " %}
+{% if not ebgp %}
+{% for b in bogons %}
+set policy-options prefix-list BOGONS {{ b }}
+{% endfor %}
+{% endif %}
+{{ F }}IP-OPTIONS from ip-options any
+{{ F }}IP-OPTIONS then syslog
+{{ F }}IP-OPTIONS then discard
+{{ F }}BOGONS from source-prefix-list BOGONS
+{{ F }}BOGONS then syslog
+{{ F }}BOGONS then discard
+{{ F }}NOT-OUR-SITE from destination-address 0.0.0.0/0
+{% for n in internal_nets %}
+{{ F }}NOT-OUR-SITE from destination-address {{ n }} except
+{% endfor %}
+{% for i in d.interfaces if i.external and i.ip %}
+{{ F }}NOT-OUR-SITE from destination-address {{ i.ip.network }} except
+{% endfor %}
+{{ F }}NOT-OUR-SITE then syslog
+{{ F }}NOT-OUR-SITE then discard
+{{ F }}ICMP-FRAGMENTS from protocol icmp
+{{ F }}ICMP-FRAGMENTS from is-fragment
+{{ F }}ICMP-FRAGMENTS then syslog
+{{ F }}ICMP-FRAGMENTS then discard
+{% if ebgp %}
+{{ F }}GTSM from protocol tcp
+{{ F }}GTSM from port bgp
+{{ F }}GTSM from ttl-except 255
+{{ F }}GTSM then syslog
+{{ F }}GTSM then discard
+{{ F }}BGP from source-prefix-list BGP-PEERS
+{{ F }}BGP from protocol tcp
+{{ F }}BGP from port bgp
+{{ F }}BGP then accept
+{% endif %}
+{{ F }}ESTABLISHED from protocol tcp
+{{ F }}ESTABLISHED from tcp-established
+{{ F }}ESTABLISHED then accept
+{{ F }}ICMP from protocol icmp
+{{ F }}ICMP from icmp-type echo-reply
+{{ F }}ICMP from icmp-type time-exceeded
+{{ F }}ICMP from icmp-type unreachable
+{{ F }}ICMP then accept
+{{ F }}DENY-ALL then syslog
+{{ F }}DENY-ALL then discard
+{% endif %}
+{% if needs_external_out %}
+{% set F = "set firewall family inet filter EXTERNAL-OUT term " %}
+{{ F }}BLOCK-TACACS from protocol tcp
+{{ F }}BLOCK-TACACS from port tacacs
+{{ F }}BLOCK-TACACS then syslog
+{{ F }}BLOCK-TACACS then discard
+{{ F }}BLOCK-SSH from protocol tcp
+{{ F }}BLOCK-SSH from port ssh
+{{ F }}BLOCK-SSH then syslog
+{{ F }}BLOCK-SSH then discard
+{{ F }}BLOCK-SNMP-SYSLOG from protocol udp
+{{ F }}BLOCK-SNMP-SYSLOG from port snmp
+{{ F }}BLOCK-SNMP-SYSLOG from port snmptrap
+{{ F }}BLOCK-SNMP-SYSLOG from port syslog
+{{ F }}BLOCK-SNMP-SYSLOG then syslog
+{{ F }}BLOCK-SNMP-SYSLOG then discard
+{{ F }}ICMP-MASK-REDIRECT from protocol icmp
+{{ F }}ICMP-MASK-REDIRECT from icmp-type mask-reply
+{{ F }}ICMP-MASK-REDIRECT from icmp-type redirect
+{{ F }}ICMP-MASK-REDIRECT from icmp-type unreachable
+{{ F }}ICMP-MASK-REDIRECT then syslog
+{{ F }}ICMP-MASK-REDIRECT then discard
+{{ F }}ALLOW-OTHER then accept
+{% endif %}
+{% if needs_egress %}
+{% set F = "set firewall family inet filter EGRESS-FILTER term " %}
+{% for n in internal_nets %}
+set policy-options prefix-list INTERNAL-NETS {{ n }}
+{% endfor %}
+{{ F }}FROM-INSIDE from source-prefix-list INTERNAL-NETS
+{{ F }}FROM-INSIDE then accept
+{{ F }}DENY-ALL then syslog
+{{ F }}DENY-ALL then discard
+{% endif %}
+{% for x in acl_lines %}
+{{ x }}
+{% endfor %}

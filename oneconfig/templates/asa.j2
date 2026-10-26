@@ -1,0 +1,306 @@
+{#- Cisco ASA. Commands follow DISA's Cisco ASA NDM and Firewall STIG fix text. Security rules become one access
+    list per ingress interface (see oneconfig/asa.py for how zone-to-zone rules map onto them). #}
+{% set aaa = "TACACS-SERVERS" if s.tacacs_servers else "RADIUS-SERVERS" if s.radius_servers else none %}
+{% set f = d.failover %}
+{% set rid = (d.ospf.router_id if d.ospf and d.ospf.router_id else none) or (d.bgp.router_id if d.bgp and d.bgp.router_id else none) %}
+: OneConfig | {{ net.name }} | {{ d.hostname }} (firewall, Cisco ASA)
+: Replace every <ANGLE-BRACKET> placeholder before deploying.
+hostname {{ d.hostname }}
+domain-name {{ s.domain }}
+! FIPS mode (STIG CASA-ND-000470): takes effect after the next reload
+fips enable
+enable password <ENABLE-SECRET> level 15
+!
+password-policy minimum-length 15
+password-policy minimum-uppercase 1
+password-policy minimum-lowercase 1
+password-policy minimum-numeric 1
+password-policy minimum-special 1
+password-policy minimum-changes 8
+password-policy reuse-interval 5
+! Local account of last resort, used only when the AAA servers are unreachable
+username <ADMIN-USER> password <ADMIN-SECRET> privilege 15
+aaa local authentication attempts max-fail 3
+!
+{% for i in d.interfaces %}
+interface {{ i.name }}
+{% if f and i.name == f.interface %}
+ description LAN failover and state link
+ no shutdown
+{% elif i.channel_group %}
+{% if i.description %}
+ description {{ i.description }}
+{% endif %}
+ channel-group {{ i.channel_group }} mode active
+ no shutdown
+{% elif i.zone %}
+{% if i.description %}
+ description {{ i.description }}
+{% endif %}
+{% if i.name.lower().startswith('management') %}
+ management-only
+{% endif %}
+ nameif {{ i.zone }}
+ security-level {{ level[i.zone] }}
+ ip address {{ i.ip.ip }} {{ i.ip.netmask }}{% if i.standby_ip %} standby {{ i.standby_ip }}{% endif %}
+
+{% if i.ospf_area is not none and d.ospf and d.ospf.authenticate %}
+ ospf message-digest-key 1 md5 <OSPF-KEY>
+ ospf authentication message-digest
+{% endif %}
+ {{ "shutdown" if i.shutdown else "no shutdown" }}
+{% else %}
+ description UNUSED
+ no nameif
+ no security-level
+ no ip address
+ shutdown
+{% endif %}
+!
+{% endfor %}
+{% if f %}
+failover
+failover lan unit {{ f.unit }}
+failover lan interface FOLINK {{ f.interface }}
+failover link FOLINK {{ f.interface }}
+failover interface ip FOLINK {{ f.ip.ip }} {{ f.ip.netmask }} standby {{ f.peer_ip }}
+failover key <FAILOVER-KEY>
+! On the {{ "secondary" if f.unit == "primary" else "primary" }} unit, enter only these lines; it then copies everything else from this unit:
+!   interface {{ f.interface }} / no shutdown
+!   failover lan unit {{ "secondary" if f.unit == "primary" else "primary" }}
+!   failover lan interface FOLINK {{ f.interface }}
+!   failover link FOLINK {{ f.interface }}
+!   failover interface ip FOLINK {{ f.ip.ip }} {{ f.ip.netmask }} standby {{ f.peer_ip }}
+!   failover key <FAILOVER-KEY>
+!   failover
+!
+{% endif %}
+{% for a in d.addresses %}
+object network {{ a.name }}
+{% if a.value.prefixlen == 32 %}
+ host {{ a.value.network_address }}
+{% else %}
+ subnet {{ a.value.network_address }} {{ a.value.netmask }}
+{% endif %}
+{% endfor %}
+{% for g in d.address_groups %}
+object-group network {{ g.name }}
+{% for m in g.members %}
+ {{ "group-object" if m in group_names else "network-object object" }} {{ m }}
+{% endfor %}
+{% endfor %}
+{% for x in d.services %}
+object service {{ x.name }}
+{% if x.protocol == 'icmp' %}
+ service icmp
+{% elif '-' in x.ports %}
+ service {{ x.protocol }} destination range {{ x.ports.replace('-', ' ') }}
+{% else %}
+ service {{ x.protocol }} destination eq {{ x.ports }}
+{% endif %}
+{% endfor %}
+{% for g in d.service_groups %}
+object-group service {{ g.name }}
+{% for m in g.members %}
+ {{ "group-object" if m in group_names else "service-object object" }} {{ m }}
+{% endfor %}
+{% endfor %}
+{% for l in policy_groups %}
+{{ l }}
+{% endfor %}
+!
+{% for l in policy_acls if not l.startswith('access-group') %}
+{{ l }}
+{% endfor %}
+!
+{% for l in nat_lines %}
+{{ l }}
+{% endfor %}
+{% for l in policy_acls if l.startswith('access-group') %}
+{{ l }}
+{% endfor %}
+!
+{% for z, i in zone_ifs.items() %}
+ip verify reverse-path interface {{ z }}
+{% endfor %}
+{% for i in d.interfaces if i.zone and i.external %}
+icmp permit any unreachable {{ i.zone }}
+icmp permit any time-exceeded {{ i.zone }}
+icmp deny any {{ i.zone }}
+{% endfor %}
+!
+{% for r in d.static_routes %}
+route {{ zone_for(r.next_hop) }} {{ r.prefix.network_address }} {{ r.prefix.netmask }} {{ r.next_hop }} 1
+{% endfor %}
+{% if d.ospf %}
+router ospf {{ d.ospf.process_id }}
+{% if rid %}
+ router-id {{ rid }}
+{% endif %}
+{% for i in d.interfaces if i.ospf_area is not none and i.ip %}
+ network {{ i.ip.network.network_address }} {{ i.ip.netmask }} area {{ i.ospf_area }}
+{% endfor %}
+{% if d.ospf.authenticate %}
+{% for a in d.interfaces | selectattr("ospf_area", "ne", none) | map(attribute="ospf_area") | unique %}
+ area {{ a }} authentication message-digest
+{% endfor %}
+{% endif %}
+ log-adj-changes
+!
+{% endif %}
+{% if d.bgp %}
+{% if ebgp %}
+{% for b in bogons %}
+prefix-list EBGP-IN seq {{ loop.index * 5 }} deny {{ b }} le 32
+{% endfor %}
+prefix-list EBGP-IN seq {{ (bogons | length + 1) * 5 }} deny 0.0.0.0/0 ge 25
+prefix-list EBGP-IN seq {{ (bogons | length + 2) * 5 }} permit 0.0.0.0/0 le 24
+{% for n in d.bgp.networks %}
+prefix-list EBGP-OUT seq {{ loop.index * 5 }} permit {{ n }}
+{% endfor %}
+{% endif %}
+router bgp {{ d.bgp.asn }}
+ bgp log-neighbor-changes
+{% if rid %}
+ bgp router-id {{ rid }}
+{% endif %}
+ address-family ipv4 unicast
+{% for n in d.bgp.neighbors %}
+  neighbor {{ n.ip }} remote-as {{ n.remote_as }}
+{% if n.description %}
+  neighbor {{ n.ip }} description {{ n.description }}
+{% endif %}
+{% if n.authenticate %}
+  neighbor {{ n.ip }} password <BGP-KEY>
+{% endif %}
+  neighbor {{ n.ip }} activate
+{% if n.max_prefix %}
+  neighbor {{ n.ip }} maximum-prefix {{ n.max_prefix }}
+{% endif %}
+{% if n in ebgp %}
+  neighbor {{ n.ip }} prefix-list EBGP-IN in
+{% if d.bgp.networks %}
+  neighbor {{ n.ip }} prefix-list EBGP-OUT out
+{% endif %}
+{% endif %}
+{% endfor %}
+{% for n in d.bgp.networks %}
+  network {{ n.network_address }} mask {{ n.netmask }}
+{% endfor %}
+  no auto-summary
+  no synchronization
+ exit-address-family
+!
+{% endif %}
+{% for t in s.tacacs_servers %}
+{% if loop.first %}
+aaa-server TACACS-SERVERS protocol tacacs+
+{% endif %}
+aaa-server TACACS-SERVERS ({{ zone_for(t) }}) host {{ t }}
+ key <TACACS-KEY>
+{% endfor %}
+{% for r in s.radius_servers %}
+{% if loop.first %}
+aaa-server RADIUS-SERVERS protocol radius
+{% endif %}
+aaa-server RADIUS-SERVERS ({{ zone_for(r) }}) host {{ r }}
+ key <RADIUS-KEY>
+{% endfor %}
+{% if aaa %}
+aaa authentication ssh console {{ aaa }} LOCAL
+aaa authentication serial console {{ aaa }} LOCAL
+aaa authentication enable console {{ aaa }} LOCAL
+{% else %}
+aaa authentication ssh console LOCAL
+aaa authentication serial console LOCAL
+{% endif %}
+{% if s.tacacs_servers %}
+aaa authorization command TACACS-SERVERS LOCAL
+aaa accounting command privilege 15 TACACS-SERVERS
+aaa accounting ssh console TACACS-SERVERS
+{% endif %}
+aaa authorization exec authentication-server
+!
+http server idle-timeout 5
+http server session-timeout 5
+{% if s.mgmt_subnet %}
+ssh {{ s.mgmt_subnet.network_address }} {{ s.mgmt_subnet.netmask }} {{ zone_for(s.mgmt_subnet.network_address) }}
+{% endif %}
+ssh version 2
+ssh timeout 5
+ssh cipher encryption fips
+ssh cipher integrity fips
+ssh key-exchange group dh-group14-sha256
+! Run once if the unit has no RSA key yet: crypto key generate rsa modulus 3072
+console timeout 5
+quota management-session 5
+!
+{% if s.dod_banner %}
+{% for l in (dod_banner | wordwrap(200, wrapstring="\n")).splitlines() %}
+banner login {{ l }}
+{% endfor %}
+{% else %}
+banner login {{ s.banner }}
+{% endif %}
+!
+logging enable
+logging timestamp
+logging device-id hostname
+logging buffer-size 524288
+logging buffered informational
+logging trap notifications
+logging queue 8192
+! Keep the log buffer on flash when it wraps (STIG CASA-ND-000920); sizes in KB, set them to your policy
+logging flash-bufferwrap
+logging flash-maximum-allocation 3076
+logging flash-minimum-free 1024
+{% if s.syslog_servers %}
+! TCP syslog (STIG CASA-FW-000100). permit-hostdown keeps traffic flowing if every log server is down.
+logging permit-hostdown
+{% for l in s.syslog_servers %}
+logging host {{ zone_for(l) }} {{ l }} 6/1514
+{% endfor %}
+{% endif %}
+!
+{% if s.ntp_servers %}
+ntp authenticate
+ntp authentication-key 1 sha256 <NTP-KEY>
+ntp trusted-key 1
+{% for n in s.ntp_servers %}
+ntp server {{ n }} key 1{% if loop.first %} prefer{% endif %}
+
+{% endfor %}
+{% endif %}
+{% if s.snmpv3 %}
+snmp-server group ONECONFIG-RO v3 priv
+snmp-server user <SNMP-USER> ONECONFIG-RO v3 auth sha256 <SNMP-AUTH-PASS> priv aes 256 <SNMP-PRIV-PASS>
+! ASA answers SNMP only from listed managers: snmp-server host <nameif> <NMS-IP> poll version 3 <SNMP-USER>
+{% endif %}
+!
+threat-detection basic-threat
+threat-detection statistics access-list
+threat-detection scanning-threat shun
+!
+class-map inspection_default
+ match default-inspection-traffic
+policy-map global_policy
+ class inspection_default
+  inspect dns
+  inspect ftp
+  inspect icmp
+  inspect icmp error
+  inspect ip-options
+  inspect netbios
+  inspect rsh
+  inspect sqlnet
+  inspect sunrpc
+  inspect tftp
+  inspect xdmcp
+service-policy global_policy global
+{% if s.backup_server %}
+!
+event manager applet BACKUP_CONFIG
+ event syslog id 111010
+ action 1 cli command "copy /noconfirm running-config scp://<BACKUP-USER>:<BACKUP-SECRET>@{{ s.backup_server }}/{{ d.hostname }}.cfg"
+ action 2 syslog priority informational msg "Configuration backup was executed"
+{% endif %}

@@ -1,0 +1,78 @@
+-------------------------
+Device ID: EDGE-R1.corp.local
+Entry address(es): 
+  IP address: 10.0.0.1
+Platform: cisco ISR4331/K9,  Capabilities: Router Switch IGMP 
+Interface: GigabitEthernet1/0/1,  Port ID (outgoing port): GigabitEthernet0/0/1
+Holdtime : 151 sec
+
+Version :
+Cisco IOS Software [Cupertino], ISR Software (X86_64_LINUX_IOSD-UNIVERSALK9-M), Version 17.9.4a, RELEASE SOFTWARE (fc3)
+Technical Support: http://www.cisco.com/techsupport
+Copyright (c) 1986-2023 by Cisco Systems, Inc.
+Compiled Fri 20-Oct-23 10:44 by mcpre
+
+advertisement version: 2
+Duplex: full
+Management address(es): 
+  IP address: 10.0.0.1
+
+-------------------------
+Device ID: ACC-SW1.corp.local
+Entry address(es): 
+  IP address: 10.99.0.11
+Platform: cisco C9200L-48P-4G,  Capabilities: Switch IGMP 
+Interface: GigabitEthernet1/0/2,  Port ID (outgoing port): GigabitEthernet1/0/47
+Holdtime : 160 sec
+
+Version :
+Cisco IOS Software [Cupertino], Catalyst L3 Switch Software (CAT9K_LITE_IOSXE), Version 17.9.4, RELEASE SOFTWARE (fc5)
+Technical Support: http://www.cisco.com/techsupport
+Copyright (c) 1986-2023 by Cisco Systems, Inc.
+Compiled Wed 26-Jul-23 07:16 by mcpre
+
+advertisement version: 2
+VTP Management Domain: ''
+Native VLAN: 999
+Duplex: full
+Management address(es): 
+  IP address: 10.99.0.11
+
+-------------------------
+Device ID: ACC-SW1.corp.local
+Entry address(es): 
+  IP address: 10.99.0.11
+Platform: cisco C9200L-48P-4G,  Capabilities: Switch IGMP 
+Interface: GigabitEthernet1/0/3,  Port ID (outgoing port): GigabitEthernet1/0/48
+Holdtime : 160 sec
+
+Version :
+Cisco IOS Software [Cupertino], Catalyst L3 Switch Software (CAT9K_LITE_IOSXE), Version 17.9.4, RELEASE SOFTWARE (fc5)
+Technical Support: http://www.cisco.com/techsupport
+Copyright (c) 1986-2023 by Cisco Systems, Inc.
+Compiled Wed 26-Jul-23 07:16 by mcpre
+
+advertisement version: 2
+VTP Management Domain: ''
+Native VLAN: 999
+Duplex: full
+Management address(es): 
+  IP address: 10.99.0.11
+
+-------------------------
+Device ID: SEP001122334455
+Entry address(es): 
+  IP address: 10.20.0.50
+Platform: Cisco IP Phone 8851,  Capabilities: Host Phone Two-port Mac Relay 
+Interface: GigabitEthernet1/0/10,  Port ID (outgoing port): Port 1
+Holdtime : 170 sec
+
+Version :
+sip88xx.14-2-1-0101-28
+
+advertisement version: 2
+Duplex: full
+Management address(es): 
+
+
+Total cdp entries displayed : 4

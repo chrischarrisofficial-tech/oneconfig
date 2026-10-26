@@ -1,0 +1,163 @@
+# Shapes of the commands in DISA's Cisco ASA NDM, Firewall, IPS and VPN STIG (Y26M07) fix text.
+# Lines Batfish rejects pass if their shape is here.
+V authentication serial console V
+V authentication ssh console V
+V local-authentication pre-shared-key xxxxxxx
+V pre-shared-key xxxxxxxxxxxxx
+V remote-authentication pre-shared-key xxxxxxx
+aaa-server V V host V
+aaa-server V protocol ldap
+aaa-server V protocol radius
+access-group V in interface V
+access-group V out interface V
+access-list V deny ip any any
+access-list V deny ip any any log
+access-list V extended deny ip any any log
+access-list V extended deny tcp any any eq V
+access-list V extended deny tcp any any eq tacacs
+access-list V extended deny udp any any eq ntp
+access-list V extended deny udp any any eq snmp
+access-list V extended deny udp any any eq snmptrap
+access-list V extended deny udp any any eq syslog
+access-list V extended permit ip V
+access-list V extended permit ip any any
+access-list V extended permit tcp V V host V eq domain
+access-list V extended permit tcp V V host V eq ftp
+access-list V extended permit tcp V V host V eq ftp-data
+access-list V extended permit tcp V V host V eq http
+access-list V extended permit tcp V V host V eq smtp
+access-list V extended permit tcp V V host V eq sqlnet
+access-list V extended permit tcp any any eq domain
+access-list V extended permit tcp any any eq ftp
+access-list V extended permit tcp any any eq ftp-data
+access-list V extended permit tcp any any eq http
+access-list V extended permit tcp any any eq https
+access-list V extended permit tcp any eq ssh V
+access-list V extended permit tcp any host V eq ftp
+access-list V extended permit tcp any host V eq ftp-data
+access-list V extended permit tcp any host V eq https
+access-list V extended permit tcp any host V eq ssh
+access-list V extended permit tcp any host V eq www
+access-list V extended permit udp any any eq sip
+access-list V extended permit udp any eq V V snmptrap
+access-list V extended permit udp any eq snmp V
+access-list V extended permit udp any eq syslog V
+access-list V permit ip object-group V any
+access-list V permit tcp any any eq http
+access-list V permit tcp any any eq https
+access-list V permit tcp any any eq …
+action V cli command " copy startup-config V
+action V syslog priority informational msg V*
+authentication certificate
+authentication pre-share
+authorization-required
+authorization-server-group V
+banner V*
+class V
+class-map V
+crypto V enable V
+crypto V policy V
+crypto V trustpoint V
+crypto ipsec V ipsec-proposal V
+crypto isakmp identity address
+crypto map V V match address V
+crypto map V V set V ipsec-proposal
+crypto map V V set V ipsec-proposal V
+crypto map V V set V transform-set V
+crypto map V V set peer V
+crypto map V V set pfs V
+crypto map V V set security-association lifetime seconds V
+crypto map V interface V
+drop log
+encryption V
+encryption …
+event manager applet V
+event syslog id V
+fips enable
+group V
+group-policy V attributes
+hash sha
+http server idle-timeout V
+inspect V
+integrity V
+integrity null
+key V
+key bobby
+key xxxxxxxxx
+ldap-over-ssl enable
+lifetime V
+lifetime seconds V
+logging buffered informational
+logging class svc trap notifications
+logging enable
+logging flash-maximum-allocation nnnnnnn
+logging flash-minimum-free nnnnnnn
+logging from-address V
+logging host V
+logging mail V
+logging permit-hostdown
+logging queue V
+logging recipient-address V
+logging timestamp
+logging trap critical
+logging trap notifications
+match access-list V
+match header hop-by-hop
+match header routing-type eq V
+match header routing-type range V
+network-object V
+no asp rule-engine transactional-commit access-group
+no http server enable
+no telnet V
+ntp authenticate
+ntp authentication-key V V xxxxxx
+ntp server V
+ntp server V key V
+ntp server V key V prefer
+ntp server V prefer
+ntp trusted-key V
+object-group network V
+parameters
+password-policy minimum-changes V
+password-policy minimum-length V
+password-policy minimum-lowercase V
+password-policy minimum-numeric V
+password-policy minimum-special V
+password-policy minimum-uppercase V
+policy-map V
+policy-map type inspect V
+prf V
+protocol esp encryption V
+protocol esp integrity V
+quota management-session V
+revocation-check crl
+revocation-check ocsp
+service-policy V global
+sfr fail-open
+smtp-server V
+snmp-server group V V auth
+snmp-server group V V priv
+snmp-server host V V version V
+snmp-server user V V V auth sha xxxxxxxxxx priv aes xxxxxxxxxx
+snmp-server user V V V auth sha xxxxxxxxxxxxxxx
+split-tunnel-policy tunnelall
+ssh V
+ssh cipher encryption fips
+ssh key-exchange group V
+ssl cipher V fips
+ssl server-version V
+threat-detection basic-threat
+threat-detection scanning-threat
+threat-detection scanning-threat shun
+tunnel-group V general-attributes
+tunnel-group V ipsec-attributes
+tunnel-group V type V
+tunnel-group V webvpn-attributes
+username V password xxxxxxxxxxxxx
+username V privilege V
+username-from-certificate username-from-certificate use-entire-name
+validation-usage ipsec-client
+validation-usage ssl-client
+verify-header order
+verify-header type
+vpn-filter value V

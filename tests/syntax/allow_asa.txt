@@ -1,0 +1,13 @@
+# Lines Batfish's ASA grammar does not model and DISA's fix text does not show verbatim, checked against Cisco's docs.
+# shape | source
+aaa local authentication attempts max-fail V | Cisco Secure Firewall ASA Series Command Reference, A-H: aaa local authentication attempts max-fail
+aaa authorization command V | ASA Command Reference, A-H: aaa authorization command (TACACS+ server group, LOCAL fallback)
+aaa accounting command privilege V | ASA Command Reference, A-H: aaa accounting command [privilege level] server-tag
+aaa accounting ssh console V | ASA Command Reference, A-H: aaa accounting {serial | telnet | ssh | enable} console server-tag
+ospf message-digest-key V md5 V | ASA Command Reference, I-R: ospf message-digest-key key-id md5 key
+ospf authentication message-digest | ASA Command Reference, I-R: ospf authentication [message-digest | null]
+failover key V | ASA Command Reference, A-H: failover key {secret | hex key}
+ssh cipher integrity fips | ASA Command Reference, S: ssh cipher integrity {all | fips | high | low | medium | custom}
+logging flash-bufferwrap | DISA ASA NDM STIG CASA-ND-000920 check text (logging flash-bufferwrap)
+logging flash-maximum-allocation V | DISA ASA NDM STIG CASA-ND-000920 fix text (value written as nnnnnnn there)
+logging flash-minimum-free V | DISA ASA NDM STIG CASA-ND-000920 fix text (value written as nnnnnnn there)

@@ -1,0 +1,39 @@
+set deviceconfig system hostname EDGE-FW2
+set deviceconfig system timezone US/Pacific
+set deviceconfig system ip-address 10.99.2.7
+set deviceconfig system netmask 255.255.255.0
+set deviceconfig system default-gateway 10.99.2.1
+set deviceconfig system snmp-setting access-setting version v2c snmp-community-string public
+set mgt-config users admin phash $1$abcdefgh$XXXXXXXXXXXXXXXXXXXXXX
+set mgt-config users admin permissions role-based superuser yes
+set network interface ethernet ethernet1/1 layer3 ip 198.51.100.2/30
+set network interface ethernet ethernet1/1 comment "ISP"
+set network interface ethernet ethernet1/2 layer3 ip 10.20.0.1/24
+set network interface ethernet ethernet1/3 layer3 units ethernet1/3.30 ip 10.30.0.1/24
+set network interface ethernet ethernet1/3 layer3 units ethernet1/3.30 tag 30
+set network interface ethernet ethernet1/8 ha
+set zone untrust network layer3 ethernet1/1
+set zone trust network layer3 [ ethernet1/2 ethernet1/3.30 ]
+set network virtual-router default interface [ ethernet1/1 ethernet1/2 ethernet1/3.30 ]
+set network virtual-router default routing-table ip static-route default destination 0.0.0.0/0
+set network virtual-router default routing-table ip static-route default nexthop ip-address 198.51.100.1
+set rulebase security rules allow-all from trust
+set rulebase security rules allow-all to untrust
+set rulebase security rules allow-all source any
+set rulebase security rules allow-all destination any
+set rulebase security rules allow-all application any
+set rulebase security rules allow-all service any
+set rulebase security rules allow-all action allow
+set rulebase nat rules outbound from trust
+set rulebase nat rules outbound to untrust
+set rulebase nat rules outbound source any
+set rulebase nat rules outbound destination any
+set rulebase nat rules outbound service any
+set rulebase nat rules outbound source-translation dynamic-ip-and-port interface-address interface ethernet1/1
+set deviceconfig high-availability enabled yes
+set deviceconfig high-availability group group-id 1
+set deviceconfig high-availability group peer-ip 10.255.255.2
+set deviceconfig high-availability group mode active-passive
+set deviceconfig high-availability interface ha1 port ethernet1/8
+set deviceconfig high-availability interface ha1 ip-address 10.255.255.1
+set deviceconfig high-availability interface ha1 netmask 255.255.255.252

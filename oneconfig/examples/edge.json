@@ -1,0 +1,76 @@
+{
+  "name": "Edge Firewall",
+  "vlans": [{"id": 99, "name": "MGMT"}],
+  "security": {
+    "domain": "corp.local",
+    "mgmt_subnet": "10.99.0.0/24",
+    "ntp_servers": ["10.99.0.10", "10.99.0.11"],
+    "syslog_servers": ["10.99.0.20", "10.99.0.21"],
+    "tacacs_servers": ["10.99.0.40", "10.99.0.41"],
+    "dod_banner": true,
+    "backup_server": "10.99.0.60"
+  },
+  "devices": [
+    {
+      "hostname": "EDGE-FW1", "role": "firewall", "platform": "asa", "mgmt_ip": "10.99.0.5", "x": 300, "y": 120,
+      "interfaces": [
+        {"name": "GigabitEthernet0/0", "description": "ISP uplink", "zone": "OUTSIDE", "ip": "203.0.113.2/29", "standby_ip": "203.0.113.3", "external": true},
+        {"name": "GigabitEthernet0/1", "description": "to CORE-SW1", "zone": "INSIDE", "ip": "10.0.0.1/29", "standby_ip": "10.0.0.2", "ospf_area": 0},
+        {"name": "GigabitEthernet0/2", "description": "DMZ servers", "zone": "DMZ", "ip": "172.16.10.1/24", "standby_ip": "172.16.10.2"},
+        {"name": "GigabitEthernet0/3"},
+        {"name": "GigabitEthernet0/7", "description": "to EDGE-FW2"},
+        {"name": "Management0/0", "zone": "MANAGEMENT", "ip": "10.99.0.5/24", "standby_ip": "10.99.0.6"}
+      ],
+      "zones": [
+        {"name": "OUTSIDE", "security_level": 0},
+        {"name": "DMZ", "security_level": 50},
+        {"name": "INSIDE", "security_level": 100},
+        {"name": "MANAGEMENT", "security_level": 100}
+      ],
+      "addresses": [
+        {"name": "INSIDE-NETS", "value": "10.0.0.0/8"},
+        {"name": "DNS-SRV", "value": "10.10.0.53/32"},
+        {"name": "WEB-SRV", "value": "172.16.10.10/32"},
+        {"name": "WEB-PUBLIC", "value": "203.0.113.4/32"}
+      ],
+      "address_groups": [{"name": "DMZ-SERVERS", "members": ["WEB-SRV"]}],
+      "services": [
+        {"name": "HTTP", "protocol": "tcp", "ports": "80"},
+        {"name": "HTTPS", "protocol": "tcp", "ports": "443"},
+        {"name": "DNS-UDP", "protocol": "udp", "ports": "53"},
+        {"name": "DNS-TCP", "protocol": "tcp", "ports": "53"}
+      ],
+      "service_groups": [
+        {"name": "WEB", "members": ["HTTP", "HTTPS"]},
+        {"name": "DNS", "members": ["DNS-UDP", "DNS-TCP"]}
+      ],
+      "rules": [
+        {"name": "INSIDE-TO-DMZ-WEB", "from_zone": "INSIDE", "to_zone": "DMZ", "source": ["INSIDE-NETS"], "destination": ["DMZ-SERVERS"], "service": ["WEB"]},
+        {"name": "INSIDE-TO-INTERNET-WEB", "from_zone": "INSIDE", "to_zone": "OUTSIDE", "source": ["INSIDE-NETS"], "service": ["WEB"]},
+        {"name": "DNS-TO-INTERNET", "from_zone": "INSIDE", "to_zone": "OUTSIDE", "source": ["DNS-SRV"], "service": ["DNS"]},
+        {"name": "INTERNET-TO-WEB", "from_zone": "OUTSIDE", "to_zone": "DMZ", "destination": ["WEB-SRV"], "service": ["HTTPS"]},
+        {"name": "DMZ-TO-INTERNET-WEB", "from_zone": "DMZ", "to_zone": "OUTSIDE", "source": ["DMZ-SERVERS"], "service": ["WEB"]}
+      ],
+      "nat": [
+        {"name": "INSIDE-PAT", "kind": "dynamic", "from_zone": "INSIDE", "to_zone": "OUTSIDE", "source": "INSIDE-NETS"},
+        {"name": "DMZ-PAT", "kind": "dynamic", "from_zone": "DMZ", "to_zone": "OUTSIDE", "source": "DMZ-SERVERS"},
+        {"name": "WEB-PUBLISH", "kind": "static", "from_zone": "DMZ", "to_zone": "OUTSIDE", "source": "WEB-SRV", "translated": "WEB-PUBLIC", "service": "HTTPS"}
+      ],
+      "failover": {"interface": "GigabitEthernet0/7", "ip": "10.255.255.1/30", "peer_ip": "10.255.255.2"},
+      "static_routes": [{"prefix": "0.0.0.0/0", "next_hop": "203.0.113.1"}],
+      "ospf": {"router_id": "10.0.0.1"},
+      "bgp": {"asn": 65010, "router_id": "10.0.0.1",
+              "neighbors": [{"ip": "203.0.113.1", "remote_as": 64500, "description": "ISP-A"}],
+              "networks": ["203.0.113.0/29"]}
+    },
+    {
+      "hostname": "CORE-SW1", "role": "l3switch", "platform": "ios-xe", "mgmt_ip": "10.99.0.1", "x": 300, "y": 320,
+      "interfaces": [
+        {"name": "GigabitEthernet1/0/1", "description": "to EDGE-FW1", "ip": "10.0.0.3/29", "ospf_area": 0},
+        {"name": "Vlan99", "ip": "10.99.0.1/24", "ospf_area": 0, "routing_passive": true}
+      ],
+      "ospf": {"router_id": "10.0.0.3"}
+    }
+  ],
+  "links": [{"a": "EDGE-FW1", "a_if": "GigabitEthernet0/1", "b": "CORE-SW1", "b_if": "GigabitEthernet1/0/1"}]
+}

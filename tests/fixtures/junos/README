@@ -1,0 +1,2 @@
+show version and show lldp neighbors outputs are real device output from ntc-templates' test data
+(github.com/networktocode/ntc-templates, Apache-2.0, commit d4f30da6), with hostnames, versions and ports changed.

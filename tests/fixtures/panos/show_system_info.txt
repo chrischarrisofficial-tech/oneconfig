@@ -1,0 +1,39 @@
+
+hostname: EDGE-FW2
+ip-address: 10.99.2.7
+public-ip-address: unknown
+netmask: 255.255.255.0
+default-gateway: 10.99.2.1
+ip-assignment: static
+ipv6-address: unknown
+ipv6-link-local-address: fe80::250:56ff:fe8a:1c2d/64
+mac-address: 00:50:56:8a:1c:2d
+time: Tue Oct 20 09:14:02 2026
+uptime: 41 days, 3:02:11
+family: 400
+model: PA-440
+serial: 012801055231
+vm-mac-base: 
+vm-mac-count: 
+vm-uuid: 
+vm-cpuid: 
+vm-license: 
+vm-cap-tier: 
+vm-cpu-count: 
+vm-memory: 
+vm-mode: 
+cloud-mode: non-cloud
+sw-version: 11.1.4-h7
+global-protect-client-package-version: 0.0.0
+device-dictionary-version: 141-563
+app-version: 8921-9165
+av-version: 5004-5522
+threat-version: 8921-9165
+wildfire-version: 0
+url-filtering-version: 20261020.20110
+logdb-version: 11.1.2
+platform-family: 400
+vpn-disable-mode: off
+multi-vsys: off
+operational-mode: normal
+device-certificate-status: Valid

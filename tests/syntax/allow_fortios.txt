@@ -1,0 +1,3 @@
+# FortiOS blocks Fortinet's configuration schema doesn't cover on every targeted release, with their source.
+# config header | source
+config system replacemsg admin "pre_admin-disclaimer-text" | DISA FortiGate Firewall NDM STIG V1R6 (Y26M10), FGFW-ND-000050 fix text; Fortinet community "Edit Disclaimer access banner" (Fortinet staff answer). Fortinet's schema stops listing replacemsg admin after 7.2.0 (its REST API), but the CLI table is what DISA's current fix uses.

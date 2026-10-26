@@ -1,0 +1,16 @@
+!Command: show running-config
+version 10.3(4a) Bios:version 07.15
+hostname DC-SPINE1
+feature interface-vlan
+feature ospf
+feature lldp
+interface Ethernet1/1
+  description to DC-LEAF1
+  no switchport
+  ip address 10.0.1.0/31
+  ip router ospf 1 area 0.0.0.0
+  no shutdown
+interface mgmt0
+  vrf member management
+  ip address 10.99.1.1/24
+router ospf 1

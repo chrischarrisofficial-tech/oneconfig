@@ -1,0 +1,518 @@
+# Shapes of the `set` commands in Palo Alto Networks' Iron-Skillet day-one configs for PAN-OS 8.0 to 11.0
+# (github.com/PaloAltoNetworks/iron-skillet, MIT; branches panos_v8.0..panos_v11.0, commits listed in NOTICE).
+# A line the PAN-OS specs don't cover passes if its shape is here.
+set address V ip-netmask V
+set deviceconfig setting application bypass-exceed-queue no
+set deviceconfig setting application notify-user yes
+set deviceconfig setting config rematch yes
+set deviceconfig setting ctd allow-http-range no
+set deviceconfig setting ctd skip-block-http-range yes
+set deviceconfig setting ctd strip-x-fwd-for yes
+set deviceconfig setting ctd tcp-bypass-exceed-queue no
+set deviceconfig setting ctd udp-bypass-exceed-queue no
+set deviceconfig setting ctd x-forwarded-for yes
+set deviceconfig setting logging log-suppression no
+set deviceconfig setting management admin-lockout failed-attempts V
+set deviceconfig setting management admin-lockout lockout-time V
+set deviceconfig setting management api key lifetime V
+set deviceconfig setting management auto-acquire-commit-lock yes
+set deviceconfig setting management enable-log-high-dp-load yes
+set deviceconfig setting management idle-timeout V
+set deviceconfig setting management max-rows-in-csv-export V
+set deviceconfig setting session packet-buffer-protection-enable yes
+set deviceconfig setting session packet-buffer-protection-latency-activate V
+set deviceconfig setting session packet-buffer-protection-latency-alert V
+set deviceconfig setting session packet-buffer-protection-latency-block-countdown V
+set deviceconfig setting session packet-buffer-protection-latency-max-tolerate V
+set deviceconfig setting tcp bypass-exceed-oo-queue no
+set deviceconfig setting tcp check-timestamp-option yes
+set deviceconfig setting tcp drop-zero-flag yes
+set deviceconfig setting tcp strip-mptcp-option yes
+set deviceconfig setting tcp urgent-data clear
+set deviceconfig setting wildfire file-size-limit V size-limit V
+set deviceconfig setting wildfire file-size-limit apk size-limit V
+set deviceconfig setting wildfire file-size-limit archive size-limit V
+set deviceconfig setting wildfire file-size-limit flash size-limit V
+set deviceconfig setting wildfire file-size-limit jar size-limit V
+set deviceconfig setting wildfire file-size-limit linux size-limit V
+set deviceconfig setting wildfire file-size-limit ms-office size-limit V
+set deviceconfig setting wildfire file-size-limit pdf size-limit V
+set deviceconfig setting wildfire file-size-limit pe size-limit V
+set deviceconfig setting wildfire file-size-limit script size-limit V
+set deviceconfig setting wildfire report-benign-file no
+set deviceconfig setting wildfire report-benign-file yes
+set deviceconfig setting wildfire report-grayware-file yes
+set deviceconfig system default-gateway V
+set deviceconfig system dns-setting servers primary V
+set deviceconfig system dns-setting servers secondary V
+set deviceconfig system hostname V
+set deviceconfig system ip-address V
+set deviceconfig system login-banner V have accessed V protected V V off immediately if you are not an authorized V
+set deviceconfig system netmask V
+set deviceconfig system ntp-servers primary-ntp-server ntp-server-address V
+set deviceconfig system ntp-servers secondary-ntp-server ntp-server-address V
+set deviceconfig system snmp-setting access-setting version V
+set deviceconfig system timezone V
+set deviceconfig system type dhcp-client accept-dhcp-domain no
+set deviceconfig system type dhcp-client accept-dhcp-hostname no
+set deviceconfig system type dhcp-client send-client-id no
+set deviceconfig system type dhcp-client send-hostname yes
+set deviceconfig system update-schedule anti-virus recurring hourly action download-and-install
+set deviceconfig system update-schedule anti-virus recurring hourly at V
+set deviceconfig system update-schedule global-protect-clientless-vpn recurring hourly action download-and-install
+set deviceconfig system update-schedule global-protect-clientless-vpn recurring hourly at V
+set deviceconfig system update-schedule global-protect-datafile recurring hourly action download-and-install
+set deviceconfig system update-schedule global-protect-datafile recurring hourly at V
+set deviceconfig system update-schedule statistics-service application-reports yes
+set deviceconfig system update-schedule statistics-service file-identification-reports yes
+set deviceconfig system update-schedule statistics-service health-performance-reports yes
+set deviceconfig system update-schedule statistics-service passive-dns-monitoring yes
+set deviceconfig system update-schedule statistics-service threat-prevention-information yes
+set deviceconfig system update-schedule statistics-service threat-prevention-pcap yes
+set deviceconfig system update-schedule statistics-service threat-prevention-reports yes
+set deviceconfig system update-schedule statistics-service url-reports yes
+set deviceconfig system update-schedule threats recurring V action download-and-install
+set deviceconfig system update-schedule threats recurring V at V
+set deviceconfig system update-schedule threats recurring threshold V
+set deviceconfig system update-schedule wildfire recurring every-min action download-and-install
+set deviceconfig system update-schedule wildfire recurring real-time
+set external-list V V V - V V addresses" type predefined-ip description V*
+set external-list V V V - V V addresses" type predefined-ip url panw-bulletproof-ip-list
+set external-list V V V - V exit V addresses" type predefined-ip description V*
+set external-list V V V - V exit V addresses" type predefined-ip url panw-torexit-ip-list
+set mgt-config password-complexity block-username-inclusion yes
+set mgt-config password-complexity enabled yes
+set mgt-config password-complexity minimum-length V
+set mgt-config password-complexity minimum-lowercase-letters V
+set mgt-config password-complexity minimum-numeric-letters V
+set mgt-config password-complexity minimum-special-characters V
+set mgt-config password-complexity minimum-uppercase-letters V
+set mgt-config password-complexity new-password-differs-by-characters V
+set mgt-config password-complexity password-change expiration-period V
+set mgt-config password-complexity password-history-count V
+set mgt-config users V password
+set mgt-config users V permissions role-based superuser yes
+set mgt-config users adminuser password
+set mgt-config users adminuser permissions role-based superuser yes
+set network profiles zone-protection-profile V discard-ip-spoof yes
+set network profiles zone-protection-profile V discard-malformed-option yes
+set network profiles zone-protection-profile V flood V enable no
+set network profiles zone-protection-profile V flood V red activate-rate V
+set network profiles zone-protection-profile V flood V red alarm-rate V
+set network profiles zone-protection-profile V flood V red maximal-rate V
+set network profiles zone-protection-profile V flood icmp enable no
+set network profiles zone-protection-profile V flood icmp red activate-rate V
+set network profiles zone-protection-profile V flood icmp red alarm-rate V
+set network profiles zone-protection-profile V flood icmp red maximal-rate V
+set network profiles zone-protection-profile V flood other-ip enable no
+set network profiles zone-protection-profile V flood other-ip red activate-rate V
+set network profiles zone-protection-profile V flood other-ip red alarm-rate V
+set network profiles zone-protection-profile V flood other-ip red maximal-rate V
+set network profiles zone-protection-profile V flood tcp-syn enable no
+set network profiles zone-protection-profile V flood tcp-syn red activate-rate V
+set network profiles zone-protection-profile V flood tcp-syn red alarm-rate V
+set network profiles zone-protection-profile V flood tcp-syn red maximal-rate V
+set network profiles zone-protection-profile V flood udp enable no
+set network profiles zone-protection-profile V flood udp red activate-rate V
+set network profiles zone-protection-profile V flood udp red alarm-rate V
+set network profiles zone-protection-profile V flood udp red maximal-rate V
+set network profiles zone-protection-profile V remove-tcp-timestamp yes
+set network profiles zone-protection-profile V scan V action alert
+set network profiles zone-protection-profile V scan V interval V
+set network profiles zone-protection-profile V scan V threshold V
+set network profiles zone-protection-profile V strip-mptcp-option global
+set network profiles zone-protection-profile V strip-tcp-fast-open-and-data no
+set profile-group V file-blocking V
+set profile-group V spyware V
+set profile-group V url-filtering V
+set profile-group V virus V
+set profile-group V vulnerability V
+set profile-group V wildfire-analysis V
+set profile-group default file-blocking V
+set profile-group default spyware V
+set profile-group default url-filtering V
+set profile-group default virus V
+set profile-group default vulnerability V
+set profile-group default wildfire-analysis V
+set profiles custom-url-category V
+set profiles custom-url-category V type V
+set profiles decryption V ssh-proxy block-unsupported-alg yes
+set profiles decryption V ssh-proxy block-unsupported-version yes
+set profiles decryption V ssl-forward-proxy block-expired-certificate yes
+set profiles decryption V ssl-forward-proxy block-timeout-cert yes
+set profiles decryption V ssl-forward-proxy block-unknown-cert yes
+set profiles decryption V ssl-forward-proxy block-unsupported-cipher yes
+set profiles decryption V ssl-forward-proxy block-unsupported-version yes
+set profiles decryption V ssl-forward-proxy block-untrusted-issuer yes
+set profiles decryption V ssl-inbound-proxy block-unsupported-cipher no
+set profiles decryption V ssl-inbound-proxy block-unsupported-version no
+set profiles decryption V ssl-no-proxy block-expired-certificate yes
+set profiles decryption V ssl-no-proxy block-untrusted-issuer yes
+set profiles decryption V ssl-protocol-settings V no
+set profiles decryption V ssl-protocol-settings keyxchg-algo-rsa no
+set profiles decryption V ssl-protocol-settings max-version V
+set profiles decryption V ssl-protocol-settings min-version V
+set profiles file-blocking V rules V action alert
+set profiles file-blocking V rules V action block
+set profiles file-blocking V rules V application any
+set profiles file-blocking V rules V direction both
+set profiles file-blocking V rules V file-type [ V bat chm class cpl dll hlp hta jar ocx pif scr torrent vbe wsf ]
+set profiles file-blocking V rules V file-type [ V bat chm class cpl hlp hta jar ocx pif scr torrent vbe wsf ]
+set profiles file-blocking V rules V file-type any
+set profiles spyware V botnet-domains dns-security-categories pan-dns-sec-benign action allow
+set profiles spyware V botnet-domains dns-security-categories pan-dns-sec-benign action default
+set profiles spyware V botnet-domains dns-security-categories pan-dns-sec-benign log-level default
+set profiles spyware V botnet-domains dns-security-categories pan-dns-sec-benign packet-capture disable
+set profiles spyware V botnet-domains dns-security-categories pan-dns-sec-cc action allow
+set profiles spyware V botnet-domains dns-security-categories pan-dns-sec-cc action default
+set profiles spyware V botnet-domains dns-security-categories pan-dns-sec-cc action sinkhole
+set profiles spyware V botnet-domains dns-security-categories pan-dns-sec-cc log-level default
+set profiles spyware V botnet-domains dns-security-categories pan-dns-sec-cc packet-capture single-packet
+set profiles spyware V botnet-domains dns-security-categories pan-dns-sec-ddns action allow
+set profiles spyware V botnet-domains dns-security-categories pan-dns-sec-ddns action default
+set profiles spyware V botnet-domains dns-security-categories pan-dns-sec-ddns log-level default
+set profiles spyware V botnet-domains dns-security-categories pan-dns-sec-ddns packet-capture disable
+set profiles spyware V botnet-domains dns-security-categories pan-dns-sec-ddns packet-capture single-packet
+set profiles spyware V botnet-domains dns-security-categories pan-dns-sec-grayware action allow
+set profiles spyware V botnet-domains dns-security-categories pan-dns-sec-grayware action sinkhole
+set profiles spyware V botnet-domains dns-security-categories pan-dns-sec-grayware log-level default
+set profiles spyware V botnet-domains dns-security-categories pan-dns-sec-grayware packet-capture single-packet
+set profiles spyware V botnet-domains dns-security-categories pan-dns-sec-malware action allow
+set profiles spyware V botnet-domains dns-security-categories pan-dns-sec-malware action default
+set profiles spyware V botnet-domains dns-security-categories pan-dns-sec-malware action sinkhole
+set profiles spyware V botnet-domains dns-security-categories pan-dns-sec-malware log-level default
+set profiles spyware V botnet-domains dns-security-categories pan-dns-sec-malware packet-capture single-packet
+set profiles spyware V botnet-domains dns-security-categories pan-dns-sec-parked action allow
+set profiles spyware V botnet-domains dns-security-categories pan-dns-sec-parked action default
+set profiles spyware V botnet-domains dns-security-categories pan-dns-sec-parked log-level default
+set profiles spyware V botnet-domains dns-security-categories pan-dns-sec-parked packet-capture disable
+set profiles spyware V botnet-domains dns-security-categories pan-dns-sec-parked packet-capture single-packet
+set profiles spyware V botnet-domains dns-security-categories pan-dns-sec-phishing action allow
+set profiles spyware V botnet-domains dns-security-categories pan-dns-sec-phishing action sinkhole
+set profiles spyware V botnet-domains dns-security-categories pan-dns-sec-phishing log-level default
+set profiles spyware V botnet-domains dns-security-categories pan-dns-sec-phishing packet-capture single-packet
+set profiles spyware V botnet-domains dns-security-categories pan-dns-sec-proxy action allow
+set profiles spyware V botnet-domains dns-security-categories pan-dns-sec-proxy action sinkhole
+set profiles spyware V botnet-domains dns-security-categories pan-dns-sec-proxy log-level default
+set profiles spyware V botnet-domains dns-security-categories pan-dns-sec-proxy packet-capture single-packet
+set profiles spyware V botnet-domains dns-security-categories pan-dns-sec-recent action allow
+set profiles spyware V botnet-domains dns-security-categories pan-dns-sec-recent action default
+set profiles spyware V botnet-domains dns-security-categories pan-dns-sec-recent log-level default
+set profiles spyware V botnet-domains dns-security-categories pan-dns-sec-recent packet-capture disable
+set profiles spyware V botnet-domains dns-security-categories pan-dns-sec-recent packet-capture single-packet
+set profiles spyware V botnet-domains lists default-paloalto-cloud action alert
+set profiles spyware V botnet-domains lists default-paloalto-cloud action sinkhole
+set profiles spyware V botnet-domains lists default-paloalto-cloud packet-capture disable
+set profiles spyware V botnet-domains lists default-paloalto-cloud packet-capture single-packet
+set profiles spyware V botnet-domains lists default-paloalto-dns action alert
+set profiles spyware V botnet-domains lists default-paloalto-dns action sinkhole
+set profiles spyware V botnet-domains lists default-paloalto-dns packet-capture disable
+set profiles spyware V botnet-domains lists default-paloalto-dns packet-capture single-packet
+set profiles spyware V botnet-domains packet-capture disable
+set profiles spyware V botnet-domains packet-capture single-packet
+set profiles spyware V botnet-domains sinkhole V
+set profiles spyware V cloud-inline-analysis yes
+set profiles spyware V description V*
+set profiles spyware V mica-engine-spyware-enabled V V and V detector" inline-policy-action alert
+set profiles spyware V mica-engine-spyware-enabled V V and V detector" inline-policy-action reset-both
+set profiles spyware V rules V action alert
+set profiles spyware V rules V action default
+set profiles spyware V rules V action reset-both
+set profiles spyware V rules V category any
+set profiles spyware V rules V packet-capture disable
+set profiles spyware V rules V packet-capture single-packet
+set profiles spyware V rules V severity [ high critical ]
+set profiles spyware V rules V severity [ high critical medium ]
+set profiles spyware V rules V severity [ low informational ]
+set profiles spyware V rules V severity [ low informational medium ]
+set profiles spyware V rules V severity any
+set profiles spyware V rules V threat-name any
+set profiles url-filtering V action block
+set profiles url-filtering V alert [ V V abortion abused-drugs adult alcohol-and-tobacco auctions business-and-economy command-and-control computer-and-internet-info content-delivery-networks copyright-infringement cryptocurrency dating dynamic-dns educational-institutions encrypted-dns entertainment-and-arts extremism financial-services gambling games government grayware hacking health-and-medicine high-risk home-and-garden hunting-and-fishing insufficient-content internet-communications-and-telephony internet-portals job-search legal low-risk malware medium-risk military motor-vehicles music newly-registered-domain news not-resolved nudity online-storage-and-backup parked peer-to-peer personal-sites-and-blogs philosophy-and-political-advocacy phishing private-ip-addresses proxy-avoidance-and-anonymizers questionable ransomware real-estate recreation-and-hobbies reference-and-research religion search-engines sex-education shareware-and-freeware shopping social-networking society sports stock-advice-and-tools streaming-media swimsuits-and-intimate-apparel training-and-tools translation travel unknown weapons web-advertisements web-based-email web-hosting ]
+set profiles url-filtering V alert [ V V abortion abused-drugs adult alcohol-and-tobacco auctions business-and-economy command-and-control computer-and-internet-info content-delivery-networks copyright-infringement cryptocurrency dating dynamic-dns educational-institutions entertainment-and-arts extremism financial-services gambling games government grayware hacking health-and-medicine high-risk home-and-garden hunting-and-fishing insufficient-content internet-communications-and-telephony internet-portals job-search legal low-risk malware medium-risk military motor-vehicles music newly-registered-domain news not-resolved nudity online-storage-and-backup parked peer-to-peer personal-sites-and-blogs philosophy-and-political-advocacy phishing private-ip-addresses proxy-avoidance-and-anonymizers questionable real-estate recreation-and-hobbies reference-and-research religion search-engines sex-education shareware-and-freeware shopping social-networking society sports stock-advice-and-tools streaming-media swimsuits-and-intimate-apparel training-and-tools translation travel unknown weapons web-advertisements web-based-email web-hosting ]
+set profiles url-filtering V alert [ V abortion abused-drugs adult alcohol-and-tobacco auctions business-and-economy computer-and-internet-info content-delivery-networks copyright-infringement cryptocurrency dating dynamic-dns educational-institutions encrypted-dns entertainment-and-arts extremism financial-services gambling games government hacking health-and-medicine high-risk home-and-garden hunting-and-fishing insufficient-content internet-communications-and-telephony internet-portals job-search legal low-risk medium-risk military motor-vehicles music newly-registered-domain news not-resolved nudity online-storage-and-backup parked peer-to-peer personal-sites-and-blogs philosophy-and-political-advocacy private-ip-addresses proxy-avoidance-and-anonymizers questionable real-estate recreation-and-hobbies reference-and-research religion search-engines sex-education shareware-and-freeware shopping social-networking society sports stock-advice-and-tools streaming-media swimsuits-and-intimate-apparel training-and-tools translation travel unknown weapons web-advertisements web-based-email web-hosting ]
+set profiles url-filtering V alert [ V abortion abused-drugs adult alcohol-and-tobacco auctions business-and-economy computer-and-internet-info content-delivery-networks copyright-infringement cryptocurrency dating dynamic-dns educational-institutions entertainment-and-arts extremism financial-services gambling games government hacking health-and-medicine high-risk home-and-garden hunting-and-fishing insufficient-content internet-communications-and-telephony internet-portals job-search legal low-risk medium-risk military motor-vehicles music newly-registered-domain news not-resolved nudity online-storage-and-backup parked peer-to-peer personal-sites-and-blogs philosophy-and-political-advocacy private-ip-addresses proxy-avoidance-and-anonymizers questionable real-estate recreation-and-hobbies reference-and-research religion search-engines sex-education shareware-and-freeware shopping social-networking society sports stock-advice-and-tools streaming-media swimsuits-and-intimate-apparel training-and-tools translation travel unknown weapons web-advertisements web-based-email web-hosting ]
+set profiles url-filtering V alert [ abortion abused-drugs adult alcohol-and-tobacco auctions business-and-economy command-and-control computer-and-internet-info content-delivery-networks copyright-infringement cryptocurrency dating dynamic-dns educational-institutions entertainment-and-arts extremism financial-services gambling games government grayware hacking health-and-medicine home-and-garden hunting-and-fishing insufficient-content internet-communications-and-telephony internet-portals job-search legal malware military motor-vehicles music news not-resolved nudity online-storage-and-backup parked peer-to-peer personal-sites-and-blogs philosophy-and-political-advocacy phishing private-ip-addresses proxy-avoidance-and-anonymizers questionable real-estate recreation-and-hobbies reference-and-research religion search-engines sex-education shareware-and-freeware shopping social-networking society sports stock-advice-and-tools streaming-media swimsuits-and-intimate-apparel training-and-tools translation travel unknown weapons web-advertisements web-based-email web-hosting V V ]
+set profiles url-filtering V alert [ abortion abused-drugs adult alcohol-and-tobacco auctions business-and-economy command-and-control computer-and-internet-info content-delivery-networks copyright-infringement dating dynamic-dns educational-institutions entertainment-and-arts extremism financial-services gambling games government hacking health-and-medicine home-and-garden hunting-and-fishing insufficient-content internet-communications-and-telephony internet-portals job-search legal malware military motor-vehicles music news not-resolved nudity online-storage-and-backup parked peer-to-peer personal-sites-and-blogs philosophy-and-political-advocacy phishing private-ip-addresses proxy-avoidance-and-anonymizers questionable real-estate recreation-and-hobbies reference-and-research religion search-engines sex-education shareware-and-freeware shopping social-networking society sports stock-advice-and-tools streaming-media swimsuits-and-intimate-apparel training-and-tools translation travel unknown weapons web-advertisements web-based-email web-hosting V V ]
+set profiles url-filtering V alert [ abortion abused-drugs adult alcohol-and-tobacco auctions business-and-economy computer-and-internet-info content-delivery-networks copyright-infringement cryptocurrency dating dynamic-dns educational-institutions entertainment-and-arts extremism financial-services gambling games government health-and-medicine home-and-garden hunting-and-fishing insufficient-content internet-communications-and-telephony internet-portals job-search legal military motor-vehicles music news not-resolved nudity online-storage-and-backup parked peer-to-peer personal-sites-and-blogs philosophy-and-political-advocacy private-ip-addresses proxy-avoidance-and-anonymizers questionable real-estate recreation-and-hobbies reference-and-research religion search-engines sex-education shareware-and-freeware shopping social-networking society sports stock-advice-and-tools streaming-media swimsuits-and-intimate-apparel training-and-tools translation travel unknown weapons web-advertisements web-based-email web-hosting V ]
+set profiles url-filtering V alert [ abortion abused-drugs adult alcohol-and-tobacco auctions business-and-economy computer-and-internet-info content-delivery-networks copyright-infringement dating dynamic-dns educational-institutions entertainment-and-arts extremism financial-services gambling games government health-and-medicine home-and-garden hunting-and-fishing insufficient-content internet-communications-and-telephony internet-portals job-search legal military motor-vehicles music news not-resolved nudity online-storage-and-backup parked peer-to-peer personal-sites-and-blogs philosophy-and-political-advocacy private-ip-addresses proxy-avoidance-and-anonymizers questionable real-estate recreation-and-hobbies reference-and-research religion search-engines sex-education shareware-and-freeware shopping social-networking society sports stock-advice-and-tools streaming-media swimsuits-and-intimate-apparel training-and-tools translation travel unknown weapons web-advertisements web-based-email web-hosting V ]
+set profiles url-filtering V alert real-time-detection
+set profiles url-filtering V block [ V command-and-control grayware malware phishing ]
+set profiles url-filtering V block [ V command-and-control grayware malware phishing ransomware ]
+set profiles url-filtering V block [ command-and-control grayware hacking malware phishing V ]
+set profiles url-filtering V block [ command-and-control hacking malware phishing V ]
+set profiles url-filtering V cloud-inline-cat yes
+set profiles url-filtering V credential-enforcement alert [ V V abortion abused-drugs adult alcohol-and-tobacco auctions business-and-economy command-and-control computer-and-internet-info content-delivery-networks copyright-infringement cryptocurrency dating dynamic-dns educational-institutions encrypted-dns entertainment-and-arts extremism financial-services gambling games government grayware hacking health-and-medicine high-risk home-and-garden hunting-and-fishing insufficient-content internet-communications-and-telephony internet-portals job-search legal low-risk malware medium-risk military motor-vehicles music newly-registered-domain news not-resolved nudity online-storage-and-backup parked peer-to-peer personal-sites-and-blogs philosophy-and-political-advocacy phishing private-ip-addresses proxy-avoidance-and-anonymizers questionable ransomware real-estate recreation-and-hobbies reference-and-research religion search-engines sex-education shareware-and-freeware shopping social-networking society sports stock-advice-and-tools streaming-media swimsuits-and-intimate-apparel training-and-tools translation travel unknown weapons web-advertisements web-based-email web-hosting ]
+set profiles url-filtering V credential-enforcement alert [ V V abortion abused-drugs adult alcohol-and-tobacco auctions business-and-economy command-and-control computer-and-internet-info content-delivery-networks copyright-infringement cryptocurrency dating dynamic-dns educational-institutions entertainment-and-arts extremism financial-services gambling games government grayware hacking health-and-medicine high-risk home-and-garden hunting-and-fishing insufficient-content internet-communications-and-telephony internet-portals job-search legal low-risk malware medium-risk military motor-vehicles music newly-registered-domain news not-resolved nudity online-storage-and-backup parked peer-to-peer personal-sites-and-blogs philosophy-and-political-advocacy phishing private-ip-addresses proxy-avoidance-and-anonymizers questionable real-estate recreation-and-hobbies reference-and-research religion search-engines sex-education shareware-and-freeware shopping social-networking society sports stock-advice-and-tools streaming-media swimsuits-and-intimate-apparel training-and-tools translation travel unknown weapons web-advertisements web-based-email web-hosting ]
+set profiles url-filtering V credential-enforcement alert [ abortion abused-drugs adult alcohol-and-tobacco auctions business-and-economy command-and-control computer-and-internet-info content-delivery-networks copyright-infringement cryptocurrency dating dynamic-dns educational-institutions entertainment-and-arts extremism financial-services gambling games government grayware hacking health-and-medicine home-and-garden hunting-and-fishing insufficient-content internet-communications-and-telephony internet-portals job-search legal malware military motor-vehicles music news not-resolved nudity online-storage-and-backup parked peer-to-peer personal-sites-and-blogs philosophy-and-political-advocacy phishing private-ip-addresses proxy-avoidance-and-anonymizers questionable real-estate recreation-and-hobbies reference-and-research religion search-engines sex-education shareware-and-freeware shopping social-networking society sports stock-advice-and-tools streaming-media swimsuits-and-intimate-apparel training-and-tools translation travel unknown weapons web-advertisements web-based-email web-hosting V V ]
+set profiles url-filtering V credential-enforcement alert [ abortion abused-drugs adult alcohol-and-tobacco auctions business-and-economy command-and-control computer-and-internet-info content-delivery-networks copyright-infringement dating dynamic-dns educational-institutions entertainment-and-arts extremism financial-services gambling games government hacking health-and-medicine home-and-garden hunting-and-fishing insufficient-content internet-communications-and-telephony internet-portals job-search legal malware military motor-vehicles music news not-resolved nudity online-storage-and-backup parked peer-to-peer personal-sites-and-blogs philosophy-and-political-advocacy phishing private-ip-addresses proxy-avoidance-and-anonymizers questionable real-estate recreation-and-hobbies reference-and-research religion search-engines sex-education shareware-and-freeware shopping social-networking society sports stock-advice-and-tools streaming-media swimsuits-and-intimate-apparel training-and-tools translation travel unknown weapons web-advertisements web-based-email web-hosting V V ]
+set profiles url-filtering V credential-enforcement alert real-time-detection
+set profiles url-filtering V credential-enforcement block [ V V abortion abused-drugs adult alcohol-and-tobacco auctions business-and-economy command-and-control computer-and-internet-info content-delivery-networks copyright-infringement cryptocurrency dating dynamic-dns educational-institutions encrypted-dns entertainment-and-arts extremism financial-services gambling games government grayware hacking health-and-medicine high-risk home-and-garden hunting-and-fishing insufficient-content internet-communications-and-telephony internet-portals job-search legal low-risk malware medium-risk military motor-vehicles music newly-registered-domain news not-resolved nudity online-storage-and-backup parked peer-to-peer personal-sites-and-blogs philosophy-and-political-advocacy phishing private-ip-addresses proxy-avoidance-and-anonymizers questionable ransomware real-estate recreation-and-hobbies reference-and-research religion search-engines sex-education shareware-and-freeware shopping social-networking society sports stock-advice-and-tools streaming-media swimsuits-and-intimate-apparel training-and-tools translation travel unknown weapons web-advertisements web-based-email web-hosting ]
+set profiles url-filtering V credential-enforcement block [ V V abortion abused-drugs adult alcohol-and-tobacco auctions business-and-economy command-and-control computer-and-internet-info content-delivery-networks copyright-infringement cryptocurrency dating dynamic-dns educational-institutions entertainment-and-arts extremism financial-services gambling games government grayware hacking health-and-medicine high-risk home-and-garden hunting-and-fishing insufficient-content internet-communications-and-telephony internet-portals job-search legal low-risk malware medium-risk military motor-vehicles music newly-registered-domain news not-resolved nudity online-storage-and-backup parked peer-to-peer personal-sites-and-blogs philosophy-and-political-advocacy phishing private-ip-addresses proxy-avoidance-and-anonymizers questionable real-estate recreation-and-hobbies reference-and-research religion search-engines sex-education shareware-and-freeware shopping social-networking society sports stock-advice-and-tools streaming-media swimsuits-and-intimate-apparel training-and-tools translation travel unknown weapons web-advertisements web-based-email web-hosting ]
+set profiles url-filtering V credential-enforcement block [ abortion abused-drugs adult alcohol-and-tobacco auctions business-and-economy command-and-control computer-and-internet-info content-delivery-networks copyright-infringement cryptocurrency dating dynamic-dns educational-institutions entertainment-and-arts extremism financial-services gambling games government grayware hacking health-and-medicine home-and-garden hunting-and-fishing insufficient-content internet-communications-and-telephony internet-portals job-search legal malware military motor-vehicles music news not-resolved nudity online-storage-and-backup parked peer-to-peer personal-sites-and-blogs philosophy-and-political-advocacy phishing private-ip-addresses proxy-avoidance-and-anonymizers questionable real-estate recreation-and-hobbies reference-and-research religion search-engines sex-education shareware-and-freeware shopping social-networking society sports stock-advice-and-tools streaming-media swimsuits-and-intimate-apparel training-and-tools translation travel unknown weapons web-advertisements web-based-email web-hosting V V ]
+set profiles url-filtering V credential-enforcement block [ abortion abused-drugs adult alcohol-and-tobacco auctions business-and-economy command-and-control computer-and-internet-info content-delivery-networks copyright-infringement dating dynamic-dns educational-institutions entertainment-and-arts extremism financial-services gambling games government hacking health-and-medicine home-and-garden hunting-and-fishing insufficient-content internet-communications-and-telephony internet-portals job-search legal malware military motor-vehicles music news not-resolved nudity online-storage-and-backup parked peer-to-peer personal-sites-and-blogs philosophy-and-political-advocacy phishing private-ip-addresses proxy-avoidance-and-anonymizers questionable real-estate recreation-and-hobbies reference-and-research religion search-engines sex-education shareware-and-freeware shopping social-networking society sports stock-advice-and-tools streaming-media swimsuits-and-intimate-apparel training-and-tools translation travel unknown weapons web-advertisements web-based-email web-hosting V V ]
+set profiles url-filtering V credential-enforcement log-severity high
+set profiles url-filtering V credential-enforcement log-severity medium
+set profiles url-filtering V credential-enforcement mode ip-user
+set profiles url-filtering V local-inline-cat yes
+set profiles url-filtering V log-http-hdr-referer yes
+set profiles url-filtering V log-http-hdr-user-agent yes
+set profiles url-filtering V log-http-hdr-xff yes
+set profiles url-filtering V mlav-engine-urlbased-enabled V V V mlav-policy-action alert
+set profiles url-filtering V mlav-engine-urlbased-enabled V V V mlav-policy-action block
+set profiles url-filtering V mlav-engine-urlbased-enabled V V mlav-policy-action alert
+set profiles url-filtering V mlav-engine-urlbased-enabled V V mlav-policy-action block
+set profiles virus V decoder V action alert
+set profiles virus V decoder V action reset-both
+set profiles virus V decoder V mlav-action alert
+set profiles virus V decoder V mlav-action reset-both
+set profiles virus V decoder V wildfire-action alert
+set profiles virus V decoder V wildfire-action reset-both
+set profiles virus V decoder ftp action alert
+set profiles virus V decoder ftp action reset-both
+set profiles virus V decoder ftp mlav-action alert
+set profiles virus V decoder ftp mlav-action reset-both
+set profiles virus V decoder ftp wildfire-action alert
+set profiles virus V decoder ftp wildfire-action reset-both
+set profiles virus V decoder http action alert
+set profiles virus V decoder http action reset-both
+set profiles virus V decoder http mlav-action alert
+set profiles virus V decoder http mlav-action reset-both
+set profiles virus V decoder http wildfire-action alert
+set profiles virus V decoder http wildfire-action reset-both
+set profiles virus V decoder imap action alert
+set profiles virus V decoder imap action reset-both
+set profiles virus V decoder imap mlav-action alert
+set profiles virus V decoder imap mlav-action reset-both
+set profiles virus V decoder imap wildfire-action alert
+set profiles virus V decoder imap wildfire-action reset-both
+set profiles virus V decoder smb action alert
+set profiles virus V decoder smb action reset-both
+set profiles virus V decoder smb mlav-action alert
+set profiles virus V decoder smb mlav-action reset-both
+set profiles virus V decoder smb wildfire-action alert
+set profiles virus V decoder smb wildfire-action reset-both
+set profiles virus V decoder smtp action alert
+set profiles virus V decoder smtp action reset-both
+set profiles virus V decoder smtp mlav-action alert
+set profiles virus V decoder smtp mlav-action reset-both
+set profiles virus V decoder smtp wildfire-action alert
+set profiles virus V decoder smtp wildfire-action reset-both
+set profiles virus V description V*
+set profiles virus V mlav-engine-filebased-enabled V V V mlav-policy-action enable
+set profiles virus V mlav-engine-filebased-enabled V V V mlav-policy-action enable(alert-only)
+set profiles virus V mlav-engine-filebased-enabled V V mlav-policy-action enable
+set profiles virus V mlav-engine-filebased-enabled V V mlav-policy-action enable(alert-only)
+set profiles virus V mlav-engine-filebased-enabled V mlav-policy-action enable
+set profiles virus V mlav-engine-filebased-enabled V mlav-policy-action enable(alert-only)
+set profiles vulnerability V
+set profiles vulnerability V cloud-inline-analysis yes
+set profiles vulnerability V mica-engine-vulnerability-enabled V V inline-policy-action alert
+set profiles vulnerability V mica-engine-vulnerability-enabled V V inline-policy-action reset-both
+set profiles vulnerability V rules V action alert
+set profiles vulnerability V rules V action default
+set profiles vulnerability V rules V action reset-both
+set profiles vulnerability V rules V category any
+set profiles vulnerability V rules V cve any
+set profiles vulnerability V rules V host any
+set profiles vulnerability V rules V packet-capture disable
+set profiles vulnerability V rules V packet-capture single-packet
+set profiles vulnerability V rules V severity [ critical high ]
+set profiles vulnerability V rules V severity [ critical high medium ]
+set profiles vulnerability V rules V severity [ low informational ]
+set profiles vulnerability V rules V severity [ low informational medium ]
+set profiles vulnerability V rules V severity any
+set profiles vulnerability V rules V threat-name any
+set profiles vulnerability V rules V vendor-id any
+set profiles wildfire-analysis V rules V analysis public-cloud
+set profiles wildfire-analysis V rules V application any
+set profiles wildfire-analysis V rules V direction both
+set profiles wildfire-analysis V rules V file-type any
+set rulebase decryption rules V V V action no-decrypt
+set rulebase decryption rules V V V category [ financial-services government health-and-medicine V ]
+set rulebase decryption rules V V V description V*
+set rulebase decryption rules V V V destination any
+set rulebase decryption rules V V V disabled yes
+set rulebase decryption rules V V V from any
+set rulebase decryption rules V V V profile V
+set rulebase decryption rules V V V service any
+set rulebase decryption rules V V V source any
+set rulebase decryption rules V V V source-user any
+set rulebase decryption rules V V V to any
+set rulebase decryption rules V V V type ssl-forward-proxy
+set rulebase decryption rules V V action no-decrypt
+set rulebase decryption rules V V category any
+set rulebase decryption rules V V description V*
+set rulebase decryption rules V V destination any
+set rulebase decryption rules V V from any
+set rulebase decryption rules V V profile V
+set rulebase decryption rules V V service any
+set rulebase decryption rules V V source any
+set rulebase decryption rules V V source-user any
+set rulebase decryption rules V V to any
+set rulebase decryption rules V V type ssl-forward-proxy
+set rulebase default-security-rules rules interzone-default action drop
+set rulebase default-security-rules rules interzone-default log-end yes
+set rulebase default-security-rules rules interzone-default log-setting default
+set rulebase default-security-rules rules interzone-default log-start no
+set rulebase default-security-rules rules intrazone-default action allow
+set rulebase default-security-rules rules intrazone-default log-end yes
+set rulebase default-security-rules rules intrazone-default log-setting default
+set rulebase default-security-rules rules intrazone-default log-start no
+set rulebase default-security-rules rules intrazone-default profile-setting group V
+set rulebase security rules V V V action deny
+set rulebase security rules V V V application any
+set rulebase security rules V V V category any
+set rulebase security rules V V V description V*
+set rulebase security rules V V V destination [ V V ]
+set rulebase security rules V V V destination [ panw-highrisk-ip-list panw-known-ip-list ]
+set rulebase security rules V V V destination [ panw-highrisk-ip-list panw-known-ip-list panw-bulletproof-ip-list ]
+set rulebase security rules V V V destination any
+set rulebase security rules V V V from any
+set rulebase security rules V V V hip-profiles any
+set rulebase security rules V V V log-setting default
+set rulebase security rules V V V service any
+set rulebase security rules V V V source [ panw-highrisk-ip-list panw-known-ip-list ]
+set rulebase security rules V V V source [ panw-highrisk-ip-list panw-known-ip-list panw-bulletproof-ip-list ]
+set rulebase security rules V V V source any
+set rulebase security rules V V V source-hip any
+set rulebase security rules V V V source-user any
+set rulebase security rules V V V tag V
+set rulebase security rules V V V to any
+set shared email-scheduler V V email-profile V
+set shared email-scheduler V V email-profile V V (c) V
+set shared email-scheduler V V email-profile V V is used to load V full V configuration
+set shared email-scheduler V V recurring disabled
+set shared email-scheduler V V report-group V
+set shared log-settings config match-list V filter V
+set shared log-settings config match-list V send-syslog V
+set shared log-settings config match-list V send-to-panorama no
+set shared log-settings email V server V display-name V
+set shared log-settings email V server V from V
+set shared log-settings email V server V gateway V
+set shared log-settings email V server V protocol V
+set shared log-settings email V server V to V
+set shared log-settings globalprotect match-list V filter V
+set shared log-settings globalprotect match-list V send-syslog V
+set shared log-settings globalprotect match-list V send-to-panorama no
+set shared log-settings hipmatch match-list V filter V
+set shared log-settings hipmatch match-list V send-syslog V
+set shared log-settings hipmatch match-list V send-to-panorama no
+set shared log-settings iptag match-list V filter V
+set shared log-settings iptag match-list V send-syslog V
+set shared log-settings iptag match-list V send-to-panorama no
+set shared log-settings profiles default match-list V action-desc V
+set shared log-settings profiles default match-list V filter "(verdict eq malicious)"
+set shared log-settings profiles default match-list V filter "(verdict eq phishing)"
+set shared log-settings profiles default match-list V filter "(verdict neq benign)"
+set shared log-settings profiles default match-list V filter V
+set shared log-settings profiles default match-list V log-type auth
+set shared log-settings profiles default match-list V log-type data
+set shared log-settings profiles default match-list V log-type threat
+set shared log-settings profiles default match-list V log-type traffic
+set shared log-settings profiles default match-list V log-type tunnel
+set shared log-settings profiles default match-list V log-type url
+set shared log-settings profiles default match-list V log-type wildfire
+set shared log-settings profiles default match-list V send-email V
+set shared log-settings profiles default match-list V send-syslog V
+set shared log-settings profiles default match-list V send-to-panorama no
+set shared log-settings syslog V server V facility V
+set shared log-settings syslog V server V format V
+set shared log-settings syslog V server V port V
+set shared log-settings syslog V server V server V
+set shared log-settings syslog V server V transport V
+set shared log-settings system match-list V description V*
+set shared log-settings system match-list V filter "(severity eq critical)"
+set shared log-settings system match-list V filter V
+set shared log-settings system match-list V send-email V
+set shared log-settings system match-list V send-syslog V
+set shared log-settings system match-list V send-to-panorama no
+set shared log-settings userid match-list V filter V
+set shared log-settings userid match-list V send-syslog V
+set shared log-settings userid match-list V send-to-panorama no
+set shared report-group V V custom-widget V custom-report V malicious sites plus"
+set shared report-group V V custom-widget V custom-report V malicious verdicts"
+set shared report-group V V custom-widget V custom-report V quest sites plus"
+set shared report-group V V custom-widget V custom-report V sinkholed"
+set shared report-group V V custom-widget V custom-report V verdicts V
+set shared report-group V V custom-widget V custom-report V visit malicious sites"
+set shared report-group V V custom-widget V custom-report V visit questionable sites"
+set shared report-group V V title-page yes
+set shared report-group V V variable title value V
+set shared reports V malicious sites plus" caption V malicious sites plus"
+set shared reports V malicious sites plus" frequency daily
+set shared reports V malicious sites plus" period V
+set shared reports V malicious sites plus" query "(category eq command-and-control) or (category eq hacking) or (category eq malware) or (category eq phishing) or (category eq grayware)"
+set shared reports V malicious sites plus" query "(category eq command-and-control) or (category eq hacking) or (category eq malware) or (category eq phishing)"
+set shared reports V malicious sites plus" topm V
+set shared reports V malicious sites plus" topn V
+set shared reports V malicious sites plus" type url aggregate-by [ from srcuser category action ]
+set shared reports V malicious sites plus" type url group-by src
+set shared reports V malicious sites plus" type url sortby repeatcnt
+set shared reports V malicious sites plus" type url values repeatcnt
+set shared reports V malicious verdicts" caption V malicious verdicts"
+set shared reports V malicious verdicts" description V*
+set shared reports V malicious verdicts" frequency daily
+set shared reports V malicious verdicts" period V
+set shared reports V malicious verdicts" query "(app neq smtp) and (category neq benign)"
+set shared reports V malicious verdicts" topm V
+set shared reports V malicious verdicts" topn V
+set shared reports V malicious verdicts" type wildfire aggregate-by [ filedigest container-of-app app category filetype rule ]
+set shared reports V malicious verdicts" type wildfire sortby repeatcnt
+set shared reports V malicious verdicts" type wildfire values repeatcnt
+set shared reports V quest sites plus" caption V quest sites plus"
+set shared reports V quest sites plus" description V*
+set shared reports V quest sites plus" frequency daily
+set shared reports V quest sites plus" period V
+set shared reports V quest sites plus" query "(category eq dynamic-dns) and (category eq parked) and (category eq questionable) and (category eq unknown)"
+set shared reports V quest sites plus" topm V
+set shared reports V quest sites plus" topn V
+set shared reports V quest sites plus" type url aggregate-by [ from srcuser category action ]
+set shared reports V quest sites plus" type url group-by src
+set shared reports V quest sites plus" type url sortby repeatcnt
+set shared reports V quest sites plus" type url values repeatcnt
+set shared reports V sinkholed" caption V sinkholed"
+set shared reports V sinkholed" frequency daily
+set shared reports V sinkholed" period V
+set shared reports V sinkholed" query "(rule eq V
+set shared reports V sinkholed" topm V
+set shared reports V sinkholed" topn V
+set shared reports V sinkholed" type traffic aggregate-by [ src srcuser ]
+set shared reports V sinkholed" type traffic group-by from
+set shared reports V sinkholed" type traffic sortby repeatcnt
+set shared reports V sinkholed" type traffic values repeatcnt
+set shared reports V verdicts V caption V verdicts V
+set shared reports V verdicts V description V*
+set shared reports V verdicts V frequency daily
+set shared reports V verdicts V period V
+set shared reports V verdicts V query "(app eq smtp) and (category neq benign)"
+set shared reports V verdicts V topm V
+set shared reports V verdicts V topn V
+set shared reports V verdicts V type wildfire aggregate-by [ filedigest container-of-app app category filetype rule subject sender recipient misc ]
+set shared reports V verdicts V type wildfire sortby repeatcnt
+set shared reports V visit malicious sites" caption V visit malicious sites"
+set shared reports V visit malicious sites" frequency daily
+set shared reports V visit malicious sites" period V
+set shared reports V visit malicious sites" query "(category eq command-and-control) or (category eq hacking) or (category eq malware) or (category eq phishing) or (category eq grayware)"
+set shared reports V visit malicious sites" query "(category eq command-and-control) or (category eq hacking) or (category eq malware) or (category eq phishing)"
+set shared reports V visit malicious sites" topm V
+set shared reports V visit malicious sites" topn V
+set shared reports V visit malicious sites" type url aggregate-by [ from srcuser ]
+set shared reports V visit malicious sites" type url group-by src
+set shared reports V visit malicious sites" type url sortby repeatcnt
+set shared reports V visit malicious sites" type url values repeatcnt
+set shared reports V visit questionable sites" caption V visit questionable sites"
+set shared reports V visit questionable sites" frequency daily
+set shared reports V visit questionable sites" period V
+set shared reports V visit questionable sites" query "(category eq dynamic-dns) and (category eq parked) and (category eq questionable) and (category eq unknown)"
+set shared reports V visit questionable sites" topm V
+set shared reports V visit questionable sites" topn V
+set shared reports V visit questionable sites" type url aggregate-by [ from srcuser ]
+set shared reports V visit questionable sites" type url group-by src
+set shared reports V visit questionable sites" type url sortby repeatcnt
+set shared reports V visit questionable sites" type url values repeatcnt
+set tag V comments V from the V
+set tag V comments V to V
+set tag V comments V to the V
+set tag iron-skillet-version comments "version V for V version of this V template file"
+set tag iron-skillet-version comments "version V version of this iron-skillet template file"

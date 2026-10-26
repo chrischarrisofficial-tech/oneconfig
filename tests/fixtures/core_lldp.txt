@@ -1,0 +1,47 @@
+------------------------------------------------
+Local Intf: Gi1/0/4
+Chassis id: 00a3.d1e8.2a80
+Port id: Gi1/0/48
+Port Description: to CORE-SW1
+System Name: ACC-SW2.corp.local
+
+System Description: 
+Cisco IOS Software [Cupertino], Catalyst L3 Switch Software (CAT9K_LITE_IOSXE), Version 17.9.4, RELEASE SOFTWARE (fc5)
+Technical Support: http://www.cisco.com/techsupport
+Copyright (c) 1986-2023 by Cisco Systems, Inc.
+Compiled Wed 26-Jul-23 07:16 by mcpre
+
+Time remaining: 101 seconds
+System Capabilities: B,R
+Enabled Capabilities: B
+Management Addresses:
+    IP: 10.99.0.12
+Auto Negotiation - supported, enabled
+Physical media capabilities:
+    1000baseT(FD)
+Media Attachment Unit type: 30
+Vlan ID: - not advertised
+
+------------------------------------------------
+Local Intf: Gi1/0/20
+Chassis id: 9c8e.cd11.2233
+Port id: 9c8e.cd11.2233
+Port Description - not advertised
+System Name: printer-2f
+
+System Description: 
+HP LaserJet
+
+Time remaining: 99 seconds
+System Capabilities: S
+Enabled Capabilities: S
+Management Addresses:
+    IP: 10.10.0.88
+Auto Negotiation - supported, enabled
+Physical media capabilities:
+    1000baseT(FD)
+Media Attachment Unit type: 30
+Vlan ID: 10
+
+
+Total entries displayed: 2

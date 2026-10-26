@@ -1,0 +1,12 @@
+! Command: show running-config
+hostname DC-LEAF1
+ip routing
+interface Ethernet1
+   description to DC-SPINE1
+   no switchport
+   ip address 10.0.1.1/31
+interface Ethernet10
+   switchport mode access
+   switchport access vlan 10
+interface Management1
+   ip address 10.99.1.11/24

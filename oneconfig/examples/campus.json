@@ -1,0 +1,255 @@
+{
+  "name": "Campus Starter",
+  "vlans": [
+    {
+      "id": 10,
+      "name": "USERS"
+    },
+    {
+      "id": 20,
+      "name": "VOICE"
+    },
+    {
+      "id": 99,
+      "name": "MGMT"
+    }
+  ],
+  "security": {
+    "domain": "corp.local",
+    "mgmt_subnet": "10.99.0.0/24",
+    "ntp_servers": [
+      "10.99.0.10",
+      "10.99.0.11"
+    ],
+    "syslog_servers": [
+      "10.99.0.20",
+      "10.99.0.21"
+    ],
+    "tacacs_servers": [
+      "10.99.0.40",
+      "10.99.0.41"
+    ],
+    "radius_servers": [
+      "10.99.0.50",
+      "10.99.0.51"
+    ],
+    "dot1x": true,
+    "ip_source_guard": true,
+    "arp_inspection": true,
+    "dod_banner": true,
+    "backup_server": "10.99.0.60"
+  },
+  "devices": [
+    {
+      "hostname": "EDGE-R1",
+      "role": "router",
+      "x": 420,
+      "y": 90,
+      "interfaces": [
+        {
+          "name": "GigabitEthernet0/0/0",
+          "description": "ISP uplink",
+          "ip": "203.0.113.2/30",
+          "external": true
+        },
+        {
+          "name": "GigabitEthernet0/0/1",
+          "description": "to CORE-SW1",
+          "ip": "10.0.0.1/30",
+          "ospf_area": 0
+        },
+        {
+          "name": "Loopback0",
+          "ip": "10.255.0.1/32",
+          "ospf_area": 0
+        }
+      ],
+      "ospf": {
+        "router_id": "10.255.0.1"
+      },
+      "bgp": {
+        "asn": 65010,
+        "router_id": "10.255.0.1",
+        "neighbors": [
+          {
+            "ip": "203.0.113.1",
+            "remote_as": 64500,
+            "description": "ISP-A"
+          }
+        ],
+        "networks": [
+          "198.51.100.0/24"
+        ]
+      },
+      "static_routes": [
+        {
+          "prefix": "198.51.100.0/24",
+          "next_hop": "Null0",
+          "name": "BGP-ANCHOR"
+        }
+      ]
+    },
+    {
+      "hostname": "CORE-SW1",
+      "role": "l3switch",
+      "x": 420,
+      "y": 280,
+      "interfaces": [
+        {
+          "name": "GigabitEthernet1/0/1",
+          "description": "to EDGE-R1",
+          "ip": "10.0.0.2/30",
+          "ospf_area": 0
+        },
+        {
+          "name": "Port-channel1",
+          "description": "to ACC-SW1",
+          "mode": "trunk",
+          "trunk_vlans": "10,20,99"
+        },
+        {
+          "name": "GigabitEthernet1/0/2",
+          "mode": "trunk",
+          "trunk_vlans": "10,20,99",
+          "channel_group": 1
+        },
+        {
+          "name": "GigabitEthernet1/0/3",
+          "mode": "trunk",
+          "trunk_vlans": "10,20,99",
+          "channel_group": 1
+        },
+        {
+          "name": "GigabitEthernet1/0/4",
+          "description": "to ACC-SW2",
+          "mode": "trunk",
+          "trunk_vlans": "10,20,99"
+        },
+        {
+          "name": "Vlan10",
+          "description": "Users gateway",
+          "ip": "10.10.0.1/24",
+          "dhcp_helper": "10.99.0.30",
+          "ospf_area": 0,
+          "routing_passive": true
+        },
+        {
+          "name": "Vlan20",
+          "description": "Voice gateway",
+          "ip": "10.20.0.1/24",
+          "ospf_area": 0,
+          "routing_passive": true
+        },
+        {
+          "name": "Vlan99",
+          "description": "Management",
+          "ip": "10.99.0.1/24",
+          "ospf_area": 0,
+          "routing_passive": true
+        },
+        {
+          "name": "Loopback0",
+          "ip": "10.255.0.2/32",
+          "ospf_area": 0
+        }
+      ],
+      "ospf": {
+        "router_id": "10.255.0.2"
+      }
+    },
+    {
+      "hostname": "ACC-SW1",
+      "role": "switch",
+      "x": 250,
+      "y": 460,
+      "interfaces": [
+        {
+          "name": "Port-channel1",
+          "description": "to CORE-SW1",
+          "mode": "trunk",
+          "trunk_vlans": "10,20,99"
+        },
+        {
+          "name": "GigabitEthernet1/0/47",
+          "mode": "trunk",
+          "trunk_vlans": "10,20,99",
+          "channel_group": 1
+        },
+        {
+          "name": "GigabitEthernet1/0/48",
+          "mode": "trunk",
+          "trunk_vlans": "10,20,99",
+          "channel_group": 1
+        },
+        {
+          "name": "GigabitEthernet1/0/1",
+          "description": "Desk 101",
+          "mode": "access",
+          "access_vlan": 10,
+          "voice_vlan": 20
+        },
+        {
+          "name": "Vlan99",
+          "ip": "10.99.0.11/24"
+        }
+      ],
+      "static_routes": [
+        {
+          "prefix": "0.0.0.0/0",
+          "next_hop": "10.99.0.1"
+        }
+      ]
+    },
+    {
+      "hostname": "ACC-SW2",
+      "role": "switch",
+      "x": 590,
+      "y": 460,
+      "interfaces": [
+        {
+          "name": "GigabitEthernet1/0/48",
+          "description": "to CORE-SW1",
+          "mode": "trunk",
+          "trunk_vlans": "10,20,99"
+        },
+        {
+          "name": "GigabitEthernet1/0/1",
+          "description": "Desk 201",
+          "mode": "access",
+          "access_vlan": 10,
+          "voice_vlan": 20
+        },
+        {
+          "name": "Vlan99",
+          "ip": "10.99.0.12/24"
+        }
+      ],
+      "static_routes": [
+        {
+          "prefix": "0.0.0.0/0",
+          "next_hop": "10.99.0.1"
+        }
+      ]
+    }
+  ],
+  "links": [
+    {
+      "a": "EDGE-R1",
+      "a_if": "GigabitEthernet0/0/1",
+      "b": "CORE-SW1",
+      "b_if": "GigabitEthernet1/0/1"
+    },
+    {
+      "a": "CORE-SW1",
+      "a_if": "Port-channel1",
+      "b": "ACC-SW1",
+      "b_if": "Port-channel1"
+    },
+    {
+      "a": "CORE-SW1",
+      "a_if": "GigabitEthernet1/0/4",
+      "b": "ACC-SW2",
+      "b_if": "GigabitEthernet1/0/48"
+    }
+  ]
+}

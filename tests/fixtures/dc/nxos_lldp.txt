@@ -1,0 +1,19 @@
+Capability codes:
+  (R) Router, (B) Bridge, (T) Telephone, (C) DOCSIS Cable Device
+  (W) WLAN Access Point, (P) Repeater, (S) Station, (O) Other
+Device ID            Local Intf      Hold-time  Capability  Port ID  
+
+Chassis id: 2cc2.6081.eaf9
+Port id: Ethernet1
+Local Port id: Eth1/1
+Port Description: to DC-SPINE1
+System Name: DC-LEAF1
+System Description: Arista Networks EOS version 4.31.2F running on an Arista Networks DCS-7050SX3-48YC8
+Time remaining: 93 seconds
+System Capabilities: B, R
+Enabled Capabilities: B, R
+Management Address: 10.99.1.11
+Vlan ID: 1
+
+
+Total entries displayed: 1

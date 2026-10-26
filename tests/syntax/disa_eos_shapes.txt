@@ -1,0 +1,357 @@
+V
+V - - ( - ) - ( - ) V
+V V - ( - ) - ( - ) V
+V V - ( - ) V
+V V active V
+V V authentication port V accounting port V
+V access-group V in
+V access-list V
+V accounting commands all default start-stop logging group radius
+V accounting exec default start-stop group radius logging
+V accounting system default start-stop group radius logging
+V address V
+V authentication V default group radius
+V authentication login console group radius local
+V authentication login console local
+V authentication login default group radius local
+V authentication login default local group V
+V authentication policy lockout failure V
+V authentication policy on-failure log
+V authentication policy on-success log
+V authorization commands all default local
+V authorization console
+V authorization exec default local group V
+V authorization policy local default-role aristaadmin
+V default
+V group server radius V
+V host-mode single-host
+V icmp rate-limit-unreachable V
+V mac based authentication
+V nd ra disabled all
+V nd ra hop-limit V
+V ospf encryption ipsec spi V esp null V passphrase V
+V pae authenticator
+V peer group V
+V port-control auto
+V reauthentication
+V system-auth-control
+V timeout quiet-period V
+action bash buf () { V V cp V V }; buf
+address-family evpn
+bandwidth kbps V
+bandwidth percent V
+banner V*
+bash
+bgp enforce-first-as
+certificate V key V
+chain certificate V
+checksum should match
+cipher V
+class copp-system-lldp
+client V V network client
+clock set hh:mm:ss V time
+clock timezone V
+config
+configure
+connection limit V
+connector V interface V
+connector V pseudowire bgp vpws V pseudowire V
+default interface V
+deny V
+deny V V any
+deny any
+deny any log
+deny command >|>>|extension|\||session|do|delete|copy|rmdir|mkdir|python-shell|bash|platform|scp|append|redirect|tee|more|less|who|show V
+deny icmp any any
+deny icmp any any host-unreachable
+deny icmp any any mask-reply
+deny icmp any any redirect
+deny igmp V any
+deny ip V any
+deny ip V any log
+deny ip V host V log
+deny ip any V
+deny ip any V V log
+deny ip any V log
+deny ip any any fragments
+deny ip any any ip-length gt V
+deny ip any any log
+deny mode config command (no |default V
+deny tcp any V
+deny udp any V
+description V*
+directory certificate
+duration V
+encapsulation V vlan V
+encapsulation vlan
+end
+entropy source hardware
+entropy source haveged
+erface V
+event-handler V
+evpn vpws id local V remote V
+exit
+fips restrictions
+idle-timeout V
+int V
+int ethernet V
+interface V
+interface ethernet V
+interface ethernet V - V
+interface vlan V
+internet V
+ip access-group V
+ip access-group V in
+ip access-group V out
+ip access-list V
+ip access-list standard V
+ip address V
+ip arp inspection vlan V
+ip dhcp snooping
+ip dhcp snooping information option
+ip dhcp snooping information option circuit-id type V format
+ip dhcp snooping vlan V
+ip icmp rate-limit-unreachable V
+ip igmp
+ip igmp access-group V
+ip ospf area V
+ip ospf authentication message-digest
+ip ospf message-digest-key V
+ip prefix-list V
+ip prefix-list V deny V ge V
+ip prefix-list V permit V le V
+ip prefix-list V seq V permit V
+ip route V
+ip routing vrf V
+ip source binding V V vlan V interface ethernet V
+ip verify source
+ip verify unicast source reachable-via any
+ip verify unicast source reachable-via rx
+logging buffered informational
+logging host V
+logging level V informational
+logging trap informational
+mac V
+management api http-commands
+management console
+management security
+management ssh
+management telnet
+match V address prefix-list V
+match as-path V
+match ip address access-list V
+mld snooping
+mpls control-word
+mpls ldp
+mpls ldp igp sync
+mpls ldp sync default
+mtu V
+multicast V boundary V out
+name=default methods=
+name=default methods=local
+name=default methods=local, group V
+name=login methods=local
+neighbor V activate
+neighbor V maximum-accepted-routes V
+neighbor V maximum-routes V
+neighbor V password V
+neighbor V password shared-secret profile V algorithm V
+neighbor V peer group
+neighbor V prefix-list V in
+neighbor V prefix-list V out
+neighbor V remote-as V
+neighbor V route-map V in
+neighbor V send-community extended
+neighbor V ttl maximum-hops V
+neighbor default encapsulation mpls next-hop-self source-interface V
+network V
+network V area V
+no V root
+no arp gratuitous accept
+no dhcp server
+no interface V
+no ip directed-broadcast
+no ip domain lookup source-interface V
+no ip proxy-arp
+no ip verify source vlan V
+no lldp receive
+no lldp run
+no lldp transmit
+no logging console
+no mlag configuration
+no mpls icmp ttl-exceeded tunneling
+no ntp
+no pim V sparse-mode
+no redistribute ospf
+no redistribute rip
+no redistribute static
+no routerport
+no shutdown
+no username admin
+ntp authenticate servers
+ntp authentication-key V
+ntp local-interface V
+ntp server V key V
+ntp server V prefer key V
+ntp trusted-key V
+or
+password V
+password minimum length V
+patch panel
+patch port
+patch subintf
+peer V
+permit V
+permit V any host V
+permit command V
+permit command show running-config V sanitized
+permit gre any host V
+permit icmp V any
+permit icmp any any
+permit icmp any any echo
+permit icmp any any echo-reply
+permit icmp host V host V echo
+permit icmp host V host V echo-reply
+permit ip V
+permit ip V any
+permit ip V host V
+permit ip any V
+permit ip any any
+permit ospf any any
+permit tcp V any eq ssh
+permit tcp V any eq www https
+permit tcp V host V eq ssh
+permit tcp V host V eq ssh telnet
+permit tcp any host V eq ssh telnet
+permit tcp any host V eq www
+permit tcp host V host V eq V
+permit udp V any eq bootps snmp
+permit udp V eq V host V
+permit udp any host V eq bootps snmp
+permit udp host V any eq ntp
+permit udp host V any eq snmp
+permit udp host V host V eq V
+pim V neighbor-filter V
+pim V sparse-mode
+policy-map type copp copp-system-policy
+pseudowire V
+qos map
+qos map dscp V V V V V V V V V V V V V V V V V V V V V V V V V V V V V V V V V V V V V V V V V V V V V V V V V V V V V to traffic-class V
+qos map dscp V V to traffic-class V
+qos map dscp V to traffic-class V
+qos trust dscp
+radius-server host V key V
+radius-server host V tls
+radius-server tls ssl-profile V
+rd V
+refresh method bundled
+reset ssh hostkey rsa
+role network-admin
+role operator
+role tester
+route-map V deny
+route-map V permit V
+route-target export V
+route-target import V
+route-target import export evpn V
+router (config) # ip as-path access-list V deny V any
+router (config) # ip as-path access-list V permit V any
+router (config) # ip as-path regex-mode asn
+router (config) # router bgp V
+router (config) #router msdp
+router (config-router-bgp) #neighbor V route-map V in
+router (config-router-msdp) #peer V
+router (config-router-msdp)#exit
+router (config-router-msdp)#originator-id local-interface V
+router (config-router-msdp-peer V # exit
+router (config-router-msdp-peer V # sa-limit V
+router bgp V
+router igmp
+router isis V
+router msdp
+router multicast
+router ospf V
+router ospf V vrf V
+router pim sparse-mode
+router rip
+router-id interface V
+routerport mode trunk
+routerport trunk allowed vlan V
+routerport trunk allowed vlan except V
+routerport trunk group V
+routerport trunk native vlan V
+routing
+rp address V access-list V
+sa-filter in V
+sa-limit V
+secret V
+security pki certificate generate signing-request key V
+seq V deny V
+seq V deny V le V
+seq V permit V
+seq V permit V ge V
+server V
+server V tls
+session shared-secret profile V
+sh act
+sh qos int V
+sh running-config | section username
+sh vlan brief
+shape rate V
+show V methods authentication
+show active
+show management ssh hostkey rsa public
+show running-config | section V
+shutdown
+snmp-server V local V
+snmp-server chassis-id V
+snmp-server contact V*
+snmp-server enable traps snmp authentication
+snmp-server enable traps snmp link-down
+snmp-server enable traps snmp link-up
+snmp-server group testers V priv read snmpview
+snmp-server host V version V priv jitc-sw
+snmp-server location V*
+snmp-server user jitc-sw testers V localized V auth sha V priv aes V
+snmp-server view snmpview system included
+spanning-tree bpduguard enabled
+spanning-tree guard loop
+spanning-tree guard loop default
+spanning-tree guard root
+spanning-tree mode mstp
+spanning-tree mode rstp
+speed V
+speed forced V
+spt threshold infinity
+ssl profile V
+ssm range V
+storm-control broadcast level pps V
+storm-control multicast level pps V
+storm-control unknown-unicast level pps V
+switch(config)interface V
+switch(config)management ssh
+switchport
+switchport access vlan V
+switchport mode access
+switchport mode trunk
+switchport trunk allowed vlan V
+switchport trunk allowed vlan except V
+switchport trunk native vlan V
+tls versions V
+trigger on-startup-config
+trunk group V
+trust certificate V
+trust certificate certificate V
+tx-queue V
+username V privilege V role network-admin secret V
+verify flash: V
+vlan
+vlan V
+vlan V state suspend
+vpws V
+vrf V
+vrf instance V
+wr
+write
+write memory
+zerotouch disable

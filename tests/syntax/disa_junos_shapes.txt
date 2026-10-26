@@ -1,0 +1,706 @@
+# Shapes of the `set` commands in DISA's Juniper Router (Y25M01) and EX Switch (Y26M07) STIG fix text, with
+# [edit ...] context applied and [a b] lists split one per line. Lines Batfish rejects pass if their shape is here.
+set access profile V authentication-order radius
+set access profile V radius authentication-server V
+set access profile V radius-server V secret V
+set access radius-server V secret V
+set archival configuration transfer-on-commit archive-sites V password V
+set chassis disk-partition V level full free-space V
+set chassis disk-partition V level full free-space percent
+set chassis disk-partition V level high free-space V
+set chassis disk-partition V level high free-space percent
+set class-of-service classifiers dscp V forwarding-class V loss-priority V code-points V
+set class-of-service classifiers dscp V forwarding-class V loss-priority V code-points V (optional - only if multiple V values are used)
+set class-of-service classifiers dscp V forwarding-class V loss-priority high code-points V
+set class-of-service classifiers dscp V forwarding-class V loss-priority low code-points V
+set class-of-service classifiers dscp V import default
+set class-of-service classifiers dscp V import default forwarding-class V loss-priority high code-points V
+set class-of-service forwarding-class-sets V class V
+set class-of-service forwarding-classes class V queue-num V
+set class-of-service forwarding-classes class V queue-num V priority low
+set class-of-service host-outbound-traffic dscp-code-point V
+set class-of-service host-outbound-traffic forwarding-class V
+set class-of-service interfaces V classifiers dscp V
+set class-of-service interfaces V forwarding-class-set V output-traffic-control-profile V
+set class-of-service interfaces V rewrite-rules dscp V
+set class-of-service interfaces V scheduler-map V
+set class-of-service interfaces V unit V classifiers dscp V
+set class-of-service interfaces V unit V classifiers dscp default
+set class-of-service interfaces V unit V rewrite-rules dscp V
+set class-of-service rewrite-rules dscp V forwarding-class V loss-priority high code-point V
+set class-of-service rewrite-rules dscp V forwarding-class V loss-priority low code-point V
+set class-of-service rewrite-rules dscp V import default forwarding-class V loss-priority high code-point V
+set class-of-service scheduler-maps V forwarding-class V scheduler V
+set class-of-service scheduler-maps V forwarding-class V scheduler V V ef-scheduler)
+set class-of-service scheduler-maps V forwarding-class best-effort scheduler V V be-scheduler)
+set class-of-service scheduler-maps V forwarding-class network-control scheduler V V nc-scheduler)
+set class-of-service schedulers V buffer-size percent V
+set class-of-service schedulers V priority low
+set class-of-service schedulers V priority strict-high
+set class-of-service schedulers V shaping-rate percent V
+set class-of-service schedulers V transmit-rate percent V
+set class-of-service shared-buffer egress buffer-partition lossless percent V
+set class-of-service shared-buffer egress buffer-partition lossy percent V
+set class-of-service shared-buffer egress buffer-partition multicast percent V
+set class-of-service shared-buffer egress percent V
+set class-of-service shared-buffer ingress buffer-partition lossless percent V
+set class-of-service shared-buffer ingress buffer-partition lossless-headroom percent V
+set class-of-service shared-buffer ingress buffer-partition lossy percent V
+set class-of-service shared-buffer ingress percent V
+set class-of-service traffic-control-profiles V guaranteed-rate percent V
+set class-of-service traffic-control-profiles V scheduler-map V
+set class-of-service traffic-control-profiles V shaping-rate percent V
+set filter V term V from protocol tcp destination-port V
+set filter V term V from protocol tcp destination-port xyz
+set filter V term V then accept
+set filter V term V then syslog reject
+set filter input V
+set firewall family V filter V
+set firewall family V filter V V from V
+set firewall family V filter V V from destination-prefix-list V
+set firewall family V filter V V then accept
+set firewall family V filter V term V
+set firewall family V filter V term V from V
+set firewall family V filter V term V from destination-address V
+set firewall family V filter V term V from destination-port V
+set firewall family V filter V term V from destination-port domain
+set firewall family V filter V term V from destination-port http
+set firewall family V filter V term V from destination-port https
+set firewall family V filter V term V from destination-port msdp
+set firewall family V filter V term V from destination-port radius
+set firewall family V filter V term V from destination-port snmp
+set firewall family V filter V term V from destination-port snmptrap
+set firewall family V filter V term V from destination-port ssh
+set firewall family V filter V term V from destination-port tacacs
+set firewall family V filter V term V from destination-prefix-list V
+set firewall family V filter V term V from next-header V
+set firewall family V filter V term V from next-header dstopts
+set firewall family V filter V term V from next-header fragment
+set firewall family V filter V term V from next-header hop-by-hop
+set firewall family V filter V term V from next-header ospf
+set firewall family V filter V term V from next-header routing
+set firewall family V filter V term V from next-header tcp
+set firewall family V filter V term V from next-header udp
+set firewall family V filter V term V from source-address V
+set firewall family V filter V term V from source-port V
+set firewall family V filter V term V from source-port msdp
+set firewall family V filter V term V from source-port snmp
+set firewall family V filter V term V from source-port snmptrap
+set firewall family V filter V term V from source-port ssh
+set firewall family V filter V term V from source-port tacacs
+set firewall family V filter V term V from source-prefix-list V
+set firewall family V filter V term V from tcp-initial
+set firewall family V filter V term V then accept
+set firewall family V filter V term V then discard
+set firewall family V filter V term V then log
+set firewall family V filter V term V then policer V
+set firewall family V filter V term V then syslog
+set firewall family V filter V term accept-others then accept
+set firewall family V filter V term default then accept
+set firewall family V filter V term default then discard
+set firewall family V filter V term default then log
+set firewall family V filter V term default then syslog
+set firewall family V filter V term default-deny then discard
+set firewall family V filter V term default-deny then log
+set firewall family V filter V term default-deny then syslog
+set firewall family V filter V term permitted-destination-addresses from destination-prefix-list V
+set firewall family V filter V term permitted-destination-addresses then accept
+set firewall family V filter V term permitted-source-addresses from source-prefix-list V
+set firewall family V filter V term permitted-source-addresses then accept
+set firewall family inet filter V
+set firewall family inet filter V V from V
+set firewall family inet filter V V from destination-prefix-list V
+set firewall family inet filter V V then accept
+set firewall family inet filter V term V
+set firewall family inet filter V term V from V
+set firewall family inet filter V term V from destination-address V
+set firewall family inet filter V term V from destination-address V except
+set firewall family inet filter V term V from destination-port V
+set firewall family inet filter V term V from destination-port bgp
+set firewall family inet filter V term V from destination-port domain
+set firewall family inet filter V term V from destination-port http
+set firewall family inet filter V term V from destination-port https
+set firewall family inet filter V term V from destination-port msdp
+set firewall family inet filter V term V from destination-port radius
+set firewall family inet filter V term V from destination-port snmp
+set firewall family inet filter V term V from destination-port snmptrap
+set firewall family inet filter V term V from destination-port ssh
+set firewall family inet filter V term V from destination-port tacacs
+set firewall family inet filter V term V from destination-prefix-list V
+set firewall family inet filter V term V from dscp V
+set firewall family inet filter V term V from icmp-type echo-reply
+set firewall family inet filter V term V from icmp-type echo-request
+set firewall family inet filter V term V from icmp-type mask-reply
+set firewall family inet filter V term V from icmp-type unreachable
+set firewall family inet filter V term V from ip-options any
+set firewall family inet filter V term V from is-fragment
+set firewall family inet filter V term V from next-header V
+set firewall family inet filter V term V from next-header ospf
+set firewall family inet filter V term V from next-header tcp
+set firewall family inet filter V term V from port ssh
+set firewall family inet filter V term V from protocol V
+set firewall family inet filter V term V from protocol icmp
+set firewall family inet filter V term V from protocol icmp icmp-type mask-request
+set firewall family inet filter V term V from protocol icmp is-fragment
+set firewall family inet filter V term V from protocol icmp then accept
+set firewall family inet filter V term V from protocol ospf
+set firewall family inet filter V term V from protocol tcp
+set firewall family inet filter V term V from protocol tcp destination-port V
+set firewall family inet filter V term V from protocol tcp destination-port ssh
+set firewall family inet filter V term V from protocol tcp destination-port tacacs
+set firewall family inet filter V term V from protocol tcp port msdp
+set firewall family inet filter V term V from protocol tcp port ssh
+set firewall family inet filter V term V from protocol tcp port tacacs
+set firewall family inet filter V term V from protocol udp
+set firewall family inet filter V term V from protocol udp destination-port ntp
+set firewall family inet filter V term V from protocol udp destination-port snmp
+set firewall family inet filter V term V from protocol udp port
+set firewall family inet filter V term V from protocol udp port V
+set firewall family inet filter V term V from protocol udp port ntp
+set firewall family inet filter V term V from protocol udp port snmp
+set firewall family inet filter V term V from protocol udp port snmptrap
+set firewall family inet filter V term V from source-address V
+set firewall family inet filter V term V from source-address V except
+set firewall family inet filter V term V from source-port V
+set firewall family inet filter V term V from source-port msdp
+set firewall family inet filter V term V from source-port snmp
+set firewall family inet filter V term V from source-port snmptrap
+set firewall family inet filter V term V from source-port ssh
+set firewall family inet filter V term V from source-port tacacs
+set firewall family inet filter V term V from source-prefix-list V
+set firewall family inet filter V term V from source-prefix-list msdp-peers
+set firewall family inet filter V term V from tcp-established
+set firewall family inet filter V term V from tcp-initial
+set firewall family inet filter V term V then accept
+set firewall family inet filter V term V then discard
+set firewall family inet filter V term V then forwarding-class V accept
+set firewall family inet filter V term V then ipsec-sa V
+set firewall family inet filter V term V then log
+set firewall family inet filter V term V then log discard
+set firewall family inet filter V term V then log reject
+set firewall family inet filter V term V then policer V
+set firewall family inet filter V term V then reject
+set firewall family inet filter V term V then syslog
+set firewall family inet filter V term V then syslog discard
+set firewall family inet filter V term accept-others then accept
+set firewall family inet filter V term accept-snmp from destination-port snmp
+set firewall family inet filter V term accept-snmp from destination-prefix-list V
+set firewall family inet filter V term accept-snmp from protocol udp
+set firewall family inet filter V term accept-snmp from source-prefix-list V
+set firewall family inet filter V term accept-snmp then accept
+set firewall family inet filter V term accept-snmp then count accept-snmp
+set firewall family inet filter V term accept-snmp then policer V
+set firewall family inet filter V term accept-ssh from destination-port ssh
+set firewall family inet filter V term accept-ssh from destination-prefix-list V
+set firewall family inet filter V term accept-ssh from protocol tcp
+set firewall family inet filter V term accept-ssh from source-prefix-list V
+set firewall family inet filter V term accept-ssh then accept
+set firewall family inet filter V term accept-ssh then count accept-ssh
+set firewall family inet filter V term accept-ssh then policer V
+set firewall family inet filter V term accept-tcp-initial from destination-port ssh
+set firewall family inet filter V term accept-tcp-initial from destination-prefix-list V
+set firewall family inet filter V term accept-tcp-initial from protocol tcp
+set firewall family inet filter V term accept-tcp-initial from source-prefix-list V
+set firewall family inet filter V term accept-tcp-initial from tcp-initial
+set firewall family inet filter V term accept-tcp-initial then accept
+set firewall family inet filter V term accept-tcp-initial then policer V
+set firewall family inet filter V term default then accept
+set firewall family inet filter V term default then discard
+set firewall family inet filter V term default then log
+set firewall family inet filter V term default then syslog
+set firewall family inet filter V term default-deny then discard
+set firewall family inet filter V term default-deny then log
+set firewall family inet filter V term default-deny then syslog
+set firewall family inet filter V term permitted-destination-addresses from destination-prefix-list V
+set firewall family inet filter V term permitted-destination-addresses then accept
+set firewall family inet filter V term permitted-source-addresses from source-prefix-list V
+set firewall family inet filter V term permitted-source-addresses then accept
+set firewall family inet filter default term V then discard
+set firewall family inet filter default term V then log
+set firewall family inet filter default term V then syslog
+set firewall family inet filter deny-prod-to-mgt term V from destination-address V
+set firewall family inet filter deny-prod-to-mgt term V from source-address V
+set firewall family inet filter deny-prod-to-mgt term V then accept
+set firewall family inet filter deny-prod-to-mgt term V then discard
+set firewall family inet filter deny-prod-to-mgt term V then log
+set firewall family inet filter deny-prod-to-mgt term V then syslog
+set firewall family inet filter gtsm term V from destination-port bgp
+set firewall family inet filter gtsm term V from protocol tcp
+set firewall family inet filter gtsm term V from ttl V
+set firewall family inet filter gtsm term V from ttl-except V
+set firewall family inet filter gtsm term V then accept
+set firewall family inet filter gtsm term V then discard
+set firewall family inet filter gtsm term V then log
+set firewall family inet filter gtsm term V then syslog
+set firewall family inet filter gtsm term default then discard
+set firewall family inet filter gtsm term default then log
+set firewall family inet filter gtsm term default then syslog
+set firewall family vpls filter V term V from traffic-type broadcast
+set firewall family vpls filter V term V from traffic-type multicast
+set firewall family vpls filter V term V from traffic-type unknown-unicast
+set firewall family vpls filter V term V then policer V accept
+set firewall filter V term V from address V
+set firewall filter V term V from protocol icmp icmp-code port-unreachable
+set firewall filter V term V from protocol icmp icmp-code ttl-eq-zero-during-transit
+set firewall filter V term V from protocol icmp icmp-type echo-reply
+set firewall filter V term V from protocol icmp icmp-type echo-request
+set firewall filter V term V from protocol ospf
+set firewall filter V term V from protocol pim
+set firewall filter V term V from protocol tcp destination-port bgp
+set firewall filter V term V from protocol tcp destination-port ntp
+set firewall filter V term V from protocol tcp destination-port snmp
+set firewall filter V term V from protocol tcp destination-port ssh
+set firewall filter V term V from protocol tcp destination-port tacacs
+set firewall filter V term V from protocol tcp port bgp ttl-except V
+set firewall filter V term V from protocol tcp source-port bgp
+set firewall filter V term V from protocol udp
+set firewall filter V term V from protocol udp destination-port V
+set firewall filter V term V from source-address V
+set firewall filter V term V then accept
+set firewall filter V term V then discard
+set firewall filter V term V then policer V
+set firewall filter V term V then syslog discard
+set firewall policer V burst-size-limit V
+set firewall policer V filter-specific
+set firewall policer V if-exceeding bandwidth-limit V
+set firewall policer V if-exceeding bandwidth-limit V burst-size-limit V
+set firewall policer V then discard
+set forwarding-options analyzer V input egress interface V
+set forwarding-options analyzer V input ingress interface V
+set forwarding-options analyzer V output interface V
+set forwarding-options analyzer V output vlan V
+set forwarding-options family vpls flood input V
+set forwarding-options storm-control-profiles profile-level all bandwidth-level V kbps)
+set forwarding-options storm-control-profiles profile-percent all bandwidth-percentage V
+set interfaces V
+set interfaces V aggregate reliable
+set interfaces V aggregated-ether-options lacp
+set interfaces V authentication V V key V
+set interfaces V authentication simple-password V
+set interfaces V description V*
+set interfaces V disable
+set interfaces V ether-options V
+set interfaces V group-limit nnn
+set interfaces V group-policy V
+set interfaces V ipsec-sa V
+set interfaces V ldp-synchronization hold-time V
+set interfaces V native-vlan-id V
+set interfaces V neighbor-policy V
+set interfaces V no-gratuitous-arp-reply
+set interfaces V no-gratuitous-arp-request
+set interfaces V unit V encapsulation vlan-ccc
+set interfaces V unit V family V
+set interfaces V unit V family V address V
+set interfaces V unit V family V filter V
+set interfaces V unit V family V filter input V
+set interfaces V unit V family V filter output V
+set interfaces V unit V family V no-redirects
+set interfaces V unit V family V rpf-check
+set interfaces V unit V family V rpf-check mode loose
+set interfaces V unit V family ethernet-switching interface-mode access
+set interfaces V unit V family ethernet-switching interface-mode trunk
+set interfaces V unit V family ethernet-switching recovery-timeout V seconds)
+set interfaces V unit V family ethernet-switching storm-control V
+set interfaces V unit V family ethernet-switching vlan members V
+set interfaces V unit V family inet V
+set interfaces V unit V family inet address V
+set interfaces V unit V family inet filter V
+set interfaces V unit V family inet filter input V
+set interfaces V unit V family inet filter input deny-prod-to-mgt
+set interfaces V unit V family inet filter input gtsm
+set interfaces V unit V family inet filter input-list V
+set interfaces V unit V family inet filter output V
+set interfaces V unit V family inet no-redirects
+set interfaces V unit V family inet rpf-check
+set interfaces V unit V family inet rpf-check mode loose
+set interfaces interface-range V disable
+set interfaces interface-range V member V
+set interfaces interface-range V member-range V to V
+set interfaces interface-range V unit V family ethernet-switching vlan members V
+set interfaces interface-range name V*
+set policy-options as-path V
+set policy-options policy-statement V from prefix-list V
+set policy-options policy-statement V from route-filter V prefix-length-range V reject
+set policy-options policy-statement V term V from as-path V
+set policy-options policy-statement V term V from prefix-list V
+set policy-options policy-statement V term V from protocol V
+set policy-options policy-statement V term V from protocol static
+set policy-options policy-statement V term V from protocol static route-filter V exact
+set policy-options policy-statement V term V from route-filter V
+set policy-options policy-statement V term V from route-filter V exact
+set policy-options policy-statement V term V from route-filter V orlonger
+set policy-options policy-statement V term V from route-filter V prefix-length-range V
+set policy-options policy-statement V term V from route-filter-list V
+set policy-options policy-statement V term V from route-filter-list customer-routes
+set policy-options policy-statement V term V from source-address-filter V
+set policy-options policy-statement V term V from source-address-filter V exact
+set policy-options policy-statement V term V from source-address-filter V orlonger
+set policy-options policy-statement V term V then accept
+set policy-options policy-statement V term V then reject
+set policy-options policy-statement V term accept-others then accept
+set policy-options policy-statement V term then accept
+set policy-options policy-statement V term unauth-groups from route-filter V exact
+set policy-options policy-statement V term unauth-groups then reject
+set policy-options policy-statement V term unauth-sources from source-address-filter V orlonger
+set policy-options policy-statement V term unauth-sources then reject
+set policy-options policy-statement V then accept
+set policy-options policy-statement advertise-bgp-prefix term V from prefix-list V
+set policy-options policy-statement advertise-bgp-prefix term V then reject
+set policy-options policy-statement advertise-bgp-prefix term default then accept
+set policy-options policy-statement bgp-advertise-cust-routes term V from route-filter-list V
+set policy-options policy-statement bgp-advertise-cust-routes term V then accept
+set policy-options policy-statement bgp-advertise-cust-routes term default then reject
+set policy-options policy-statement bgp-discard term V from protocol direct
+set policy-options policy-statement bgp-discard term V from protocol ospf
+set policy-options policy-statement bgp-discard term V from route-filter-list V
+set policy-options policy-statement bgp-discard term V from route-filter-list bogon
+set policy-options policy-statement bgp-discard term V from route-filter-list local-routes
+set policy-options policy-statement bgp-discard term V then reject
+set policy-options policy-statement deny-managed-routes term V from route-filter V orlonger
+set policy-options policy-statement deny-managed-routes term V then accept
+set policy-options policy-statement deny-managed-routes term V then reject
+set policy-options policy-statement deny-mgt-redist term V from protocol ospf
+set policy-options policy-statement deny-mgt-redist term V from protocol static
+set policy-options policy-statement deny-mgt-redist term V from route-filter V orlonger
+set policy-options policy-statement deny-mgt-redist term V then reject
+set policy-options policy-statement source-active-filter term unauth-groups from route-filter V exact
+set policy-options policy-statement source-active-filter term unauth-groups then reject
+set policy-options policy-statement source-active-filter term unauth-sources from source-address-filter V orlonger
+set policy-options policy-statement source-active-filter term unauth-sources then reject
+set policy-options prefix-list V
+set policy-options route-filter-list V V exact
+set policy-options route-filter-list V V orlonger
+set policy-options route-filter-list bogon V orlonger
+set policy-options route-filter-list local-routes V orlonger
+set prefix-list V
+set protocols V area V interface V ipsec-sa V
+set protocols V authenticator authentication-profile-name V
+set protocols V authenticator interface V authentication-order V
+set protocols V authenticator interface V authentication-order captive-portal
+set protocols V authenticator interface V authentication-order mac-radius
+set protocols V authenticator interface V mac-radius
+set protocols V authenticator interface V mac-radius restrict
+set protocols V authenticator interface V supplicant multiple
+set protocols V authenticator interface V supplicant single-secure
+set protocols V authenticator static V interface V
+set protocols V authenticator static V vlan-assignment V
+set protocols V export V
+set protocols V neighbor V interface V virtual-circuit-id V
+set protocols bgp authentication-key-chain V
+set protocols bgp enforce-first-as
+set protocols bgp export V
+set protocols bgp export advertise-bgp-prefix
+set protocols bgp export bgp-advertise-cust-routes
+set protocols bgp group V authentication-key V
+set protocols bgp group V authentication-key-chain V
+set protocols bgp group V enforce-first-as
+set protocols bgp group V export V
+set protocols bgp group V export advertise-bgp-prefix
+set protocols bgp group V export bgp-advertise-cust-routes
+set protocols bgp group V family inet unicast prefix-limit maximum nnnnn teardown
+set protocols bgp group V import V
+set protocols bgp group V import bgp-discard
+set protocols bgp group V local-address V
+set protocols bgp group V local-as V
+set protocols bgp group V local-interface V
+set protocols bgp group V neighbor V
+set protocols bgp group V neighbor V authentication-algorithm V
+set protocols bgp group V neighbor V authentication-key V
+set protocols bgp group V neighbor V authentication-key-chain V
+set protocols bgp group V neighbor V export V
+set protocols bgp group V neighbor V export advertise-bgp-prefix
+set protocols bgp group V neighbor V export bgp-advertise-cust-routes
+set protocols bgp group V neighbor V family V unicast prefix-limit maximum V
+set protocols bgp group V neighbor V family V unicast prefix-limit teardown
+set protocols bgp group V neighbor V family inet unicast prefix-limit maximum V
+set protocols bgp group V neighbor V family inet unicast prefix-limit teardown
+set protocols bgp group V neighbor V import V
+set protocols bgp group V neighbor V import bgp-discard
+set protocols bgp group V neighbor V ipsec-sa V
+set protocols bgp group V neighbor V ipsec-sa test
+set protocols bgp group V peer-as V
+set protocols bgp group V type external
+set protocols bgp group V type internal
+set protocols bgp group enforce-first-as
+set protocols bgp import V
+set protocols bgp import bgp-discard
+set protocols igmp interface V group-limit V
+set protocols igmp interface V group-policy V
+set protocols igmp-snooping vlan all immediate-leave
+set protocols igmp-snooping vlan all interface V multicast-router-interface
+set protocols igmp-snooping vlan vlan-name immediate-leave
+set protocols igmp-snooping vlan vlan-name interface V host-only-interface
+set protocols igmp-snooping vlan vlan-name interface V multicast-router-interface
+set protocols isis interface V ldp-synchronize hold-time V
+set protocols isis interface V level V hello-authentication-key-chain V
+set protocols isis level V authentication-key V
+set protocols isis level V authentication-key-chain V
+set protocols isis level V authentication-type V
+set protocols ldp interface V
+set protocols ldp session V authentication-algorithm V
+set protocols ldp session V authentication-algorithm V authentication-key-chain V
+set protocols ldp session V authentication-key V
+set protocols ldp session V authentication-key-chain V
+set protocols lldp interface V
+set protocols lldp interface V disable
+set protocols lldp interface all disable
+set protocols lldp-med interface V
+set protocols lldp-med interface V disable
+set protocols lldp-med interface all disable
+set protocols mld interface V group-limit V
+set protocols mld interface V group-policy V
+set protocols mld-snooping vlan all immediate-leave
+set protocols mld-snooping vlan all interface V multicast-router-interface
+set protocols mld-snooping vlan vlan-name immediate-leave
+set protocols mld-snooping vlan vlan-name interface V host-only-interface
+set protocols mld-snooping vlan vlan-name interface V multicast-router-interface
+set protocols mpls interface V
+set protocols mpls no-propagate-ttl
+set protocols msdp active-source-limit log-warning V
+set protocols msdp active-source-limit maximum V
+set protocols msdp active-source-limit threshold V
+set protocols msdp export V
+set protocols msdp group V peer V active-source-limit maximum nnn
+set protocols msdp group V peer V authentication-key V
+set protocols msdp group V peer V local-address V
+set protocols msdp import V
+set protocols msdp local-address V
+set protocols msdp peer V active-source-limit log-warning V
+set protocols msdp peer V active-source-limit maximum V
+set protocols msdp peer V active-source-limit threshold V
+set protocols msdp peer V authentication-key V
+set protocols msdp peer V export source-active-filter
+set protocols msdp peer V import source-active-filter
+set protocols mstp bpdu-block-on-edge
+set protocols mstp bridge-priority V in V increments)
+set protocols mstp configuration-name V
+set protocols mstp forward-delay V seconds)
+set protocols mstp hello-time V seconds)
+set protocols mstp interface V bpdu-timeout-action block
+set protocols mstp interface V edge
+set protocols mstp interface V mode point-to-point
+set protocols mstp interface V no-root-port
+set protocols mstp max-age V seconds)
+set protocols mstp msti V bridge-priority V in V increments)
+set protocols mstp msti V vlan V
+set protocols mstp revision-level V
+set protocols oam ethernet link-fault-management interface V
+set protocols ospf area V interface V
+set protocols ospf area V interface V authentication V
+set protocols ospf area V interface V authentication V V key V
+set protocols ospf area V interface V authentication V V key V start-time V
+set protocols ospf area V interface V authentication V V start-time V
+set protocols ospf area V interface V interface-type V
+set protocols ospf area V interface V ipsec-sa V
+set protocols ospf area V interface V ldp-synchronize hold-time V
+set protocols ospf export V
+set protocols pim disable
+set protocols pim import V
+set protocols pim interface V
+set protocols pim interface V mode sparse
+set protocols pim interface V neighbor-policy V
+set protocols pim interface all disable
+set protocols pim rp register-limit maximum V
+set protocols pim rp register-limit maximum nnnnn
+set protocols pim rp rp-register-policy V
+set protocols pim spt-threshold infinity V
+set protocols rip authentication-key V
+set protocols rip authentication-type V
+set protocols router-advertisement interface V current-hop-limit V
+set protocols rstp bpdu-block-on-edge
+set protocols rstp bridge-priority V in V increments)
+set protocols rstp interface V bpdu-timeout-action block
+set protocols rstp interface V edge
+set protocols rstp interface V mode point-to-point
+set protocols rsvp interface V
+set protocols rsvp interface V aggregate
+set protocols rsvp interface V reliable
+set protocols vstp interface V bpdu-timeout-action block
+set rib V static route V next-hop V
+set routing-instance V protocols vpls interface V interface-mac-limit V
+set routing-instance V protocols vpls interface-mac-limit V
+set routing-instances V description V*
+set routing-instances V forwarding-options family vpls flood input V
+set routing-instances V instance-type virtual-router
+set routing-instances V instance-type vrf
+set routing-instances V interface V
+set routing-instances V protocols V area V interface V
+set routing-instances V protocols V export test
+set routing-instances V protocols igmp-snooping vlan V
+set routing-instances V protocols mld-snooping vlan V
+set routing-instances V protocols ospf area V interface V
+set routing-instances V protocols ospf export test
+set routing-instances V protocols ospf interface area V
+set routing-instances V protocols pim-snooping
+set routing-instances V protocols vpls mac-table-size nnnn
+set routing-instances V protocols vpls vpls-id V neighbor V
+set routing-instances V route-distinguisher V
+set routing-instances V routing-options router-id V
+set routing-instances V vrf-table-label
+set routing-instances V vrf-target V
+set routing-instances V vrf-target export V
+set routing-instances V vrf-target import V
+set routing-options autonomous-system V
+set routing-options multicast forwarding-cache threshold log-warning V
+set routing-options multicast forwarding-cache threshold reuse V
+set routing-options multicast forwarding-cache threshold suppress V
+set routing-options multicast forwarding-cache threshold suppress V reuse V
+set routing-options multicast scope V interface V
+set routing-options multicast scope V interface V prefix V
+set routing-options multicast scope V prefix V
+set routing-options multicast scope-policy V
+set routing-options rib V static route V next-hop V
+set routing-options router-id V
+set routing-options static route V next-hop V
+set security authentication-key-chains key-chain V key V algorithm V
+set security authentication-key-chains key-chain V key V options isis-enhanced
+set security authentication-key-chains key-chain V key V secret V
+set security authentication-key-chains key-chain V key V start-time V
+set security authentication-key-chains key-chain V key V start-time V algorithm V secret V
+set security authentication-key-chains key-chain V key V start-time V secret V
+set security ike policy V mode main
+set security ike policy V pre-shared-key ascii-text V
+set security ike policy V proposals V
+set security ike proposal V authentication-algorithm V
+set security ike proposal V authentication-method pre-shared-keys
+set security ike proposal V dh-group V
+set security ike proposal V encryption-algorithm V
+set security ipsec proposal V authentication-algorithm V
+set security ipsec proposal V encryption-algorithm V
+set security ipsec proposal V protocol esp
+set security ipsec security-association V
+set security ipsec security-association V dynamic ipsec-policy V
+set security ipsec security-association V manual direction bidirectional
+set security ipsec security-association V manual direction bidirectional authentication algorithm V
+set security ipsec security-association V manual direction bidirectional authentication algorithm V key ascii-text V
+set security ipsec security-association V manual direction bidirectional authentication key ascii-text V
+set security ipsec security-association V manual direction bidirectional authentication key hexadecimal V
+set security ipsec security-association V manual direction bidirectional protocol ah
+set security ipsec security-association V manual direction bidirectional protocol esp
+set security ipsec security-association V manual direction bidirectional spi V
+set security ipsec security-association V mode transport
+set security ipsec security-association V mode tunnel
+set security pki ca-profile V administrator email-address V
+set security pki ca-profile V ca-identity V
+set security pki ca-profile V revocation-check crl refresh-interval V
+set security pki ca-profile V revocation-check crl url V
+set security policy V perfect-forward-secrecy keys V
+set security policy V proposals V
+set snmp V notify V type trap tag V
+set snmp V snmp-community V security-name V tag V
+set snmp V target-address V address V
+set snmp V target-address V address-mask V
+set snmp V target-address V tag-list V
+set snmp V target-address V target-parameters V
+set snmp V target-parameters V parameters message-processing-model V
+set snmp V target-parameters V parameters security-level authentication
+set snmp V target-parameters V parameters security-level privacy
+set snmp V target-parameters V parameters security-model usm
+set snmp V target-parameters V parameters security-name V
+set snmp V usm local-engine user V V privacy-password V
+set snmp V usm local-engine user V authentication-sha authentication-password V
+set snmp health-monitor falling-threshold V
+set snmp health-monitor interval V
+set snmp health-monitor rising-threshold V
+set static route V next-hop V
+set syslog file V change-log info
+set syslog host V any critical
+set syslog host V any info
+set system archival configuration archive-sites V password V
+set system archival configuration transfer-on-commit
+set system authentication-order V
+set system authentication-order password
+set system authentication-order radius
+set system authentication-order tacplus
+set system host-name V
+set system login class V allow-configuration "(system syslog)"
+set system login class V deny-commands "(file delete)"
+set system login class V deny-commands "(request system software)"
+set system login class V deny-commands V
+set system login class V deny-configuration "(system syslog)"
+set system login class V deny-configuration-regexps V
+set system login class V idle-timeout V
+set system login class V permissions V
+set system login class V permissions all
+set system login class V permissions configure
+set system login class V permissions view-configuration
+set system login idle-timeout V
+set system login message V are accessing V V V V V V V that is provided\nfor V use V using this V (which includes any device attached to this V you consent to the\nfollowing V V routinely intercepts and monitors communications on this V for purposes\nincluding, but not limited to, penetration testing, V monitoring, network\noperations and defense, personnel misconduct V law enforcement V and\ncounterintelligence V V any time, the V may inspect and seize data stored on this V using, or data stored on, this V are not private, are subject to routine\nmonitoring, interception, and search, and may V disclosed or used for any V V V includes security measures V authentication and access controls) to V interests--not for your personal benefit or V the above, using this V does not constitute consent to V V or V searching or monitoring of the content of privileged communications, or\nwork product, related to personal representation or services by attorneys,\npsychotherapists, or clergy, and their V V communications and work product\nare private and V V V V for V
+set system login message:
+set system login password format V
+set system login password minimum-character-changes V
+set system login password minimum-length V
+set system login password minimum-lower-cases V
+set system login password minimum-numerics V
+set system login password minimum-punctuations V
+set system login password minimum-upper-cases V
+set system login retry-options lockout-period V
+set system login retry-options tries-before-disconnect V
+set system login user V authentication plain-text-password
+set system login user V class V
+set system master-password plain-text-password
+set system no-redirects
+set system ntp authentication-key V type V
+set system ntp authentication-key V type V value V
+set system ntp authentication-key V value V
+set system ntp server V
+set system ntp server V key V
+set system ntp server V key V prefer
+set system ntp server V prefer
+set system ntp source-address V
+set system ntp trusted-key V
+set system ports auxiliary disable
+set system processes web-management disable
+set system radius-server V secret V
+set system rng hmac-drbg
+set system services netconf rfc-compliant
+set system services netconf ssh
+set system services netconf ssh connection-limit V
+set system services netconf ssh rate-limit V
+set system services ssh ciphers V
+set system services ssh connection-limit V
+set system services ssh key-exchange V
+set system services ssh macs V
+set system services ssh max-sessions-per-connection V
+set system services ssh protocol-version V
+set system services ssh rate-limit V
+set system services ssh root-login deny
+set system syslog archive size V files V no-world-readable
+set system syslog file V any V
+set system syslog file V any any
+set system syslog file V any info
+set system syslog file V archive files V size V
+set system syslog file V authorization info
+set system syslog file V change-log info
+set system syslog file V explicit-priority
+set system syslog file V firewall any
+set system syslog file V interactive-commands
+set system syslog file V interactive-commands info
+set system syslog file V match V
+set system syslog file V match-strings "string
+set system syslog file V match-strings V
+set system syslog file V messages any info
+set system syslog file V structured-data
+set system syslog file messages any info
+set system syslog host V any info
+set system syslog host V authorization info
+set system syslog host V change-log info
+set system syslog host V explicit-priority
+set system syslog host V interactive-commands info
+set system syslog host V structured-data
+set system syslog time-format V
+set system syslog time-format year
+set system tacplus-server V secret V
+set system time-zone V
+set system user V class V authentication plain-text-password
+set term V V from next-header dstops
+set term V V then discard syslog
+set term V from next-header hop-by-hop
+set term V from next-header routing
+set term V then discard syslog
+set the idle timeout value to five minutes or less on all configured login classes as shown in the example below
+set the password for the account of last resort:
+set vlans V forwarding-options dhcp-security
+set vlans V forwarding-options dhcp-security arp-inspection
+set vlans V forwarding-options dhcp-security ip-source-guard
+set vlans V vlan-id V

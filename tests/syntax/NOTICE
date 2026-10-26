@@ -1,0 +1,6 @@
+build_parser.sh compiles parsers from Batfish's NX-OS, Arista EOS, flat Junos and Cisco ASA ANTLR grammars
+(https://github.com/batfish/batfish, Apache License 2.0). Nothing from Batfish is copied into this repository.
+
+disa_*_shapes.txt are derived from the command examples in DISA's Cisco NX-OS Switch STIG (Y26M07),
+Arista MLS EOS 4.X STIG (Y25M07), Juniper Router STIG (Y25M01), Juniper EX Switches STIG (Y26M07) and Cisco ASA STIG (Y26M07)
+fix text (public domain).

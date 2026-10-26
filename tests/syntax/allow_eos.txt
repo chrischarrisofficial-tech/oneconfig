@@ -1,0 +1,5 @@
+# Lines Batfish's Arista grammar does not model and DISA's fix text does not show verbatim, checked against vendor docs.
+# shape | source
+switchport port-security | https://www.arista.com/en/um-eos/eos-data-transfer (Port Security)
+switchport port-security mac-address maximum V | (same page)
+aaa authentication policy lockout failure V duration V | DISA ARST-ND-000120 fix text, printed wrapped onto two lines; NOT confirmed in Arista's manual

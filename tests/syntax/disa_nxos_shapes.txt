@@ -1,0 +1,267 @@
+V accounting default group V
+V authentication V default group V
+V authentication login console group V
+V authentication login default fallback error local
+V authentication login default group V
+V group server radius V
+V host-mode single-host
+V nd hop-limit V
+V nd suppress-ra
+V port-control auto
+V vfi context V
+accept-lifetime V
+access-class V in
+action V cli "copy startup-config V
+action V syslog priority informational msg V*
+address-family V unicast
+authentication key-chain V
+authentication mode V
+bandwidth percent V
+banner V*
+bridge-domain V
+callhome
+class V
+class class-default
+class-map match-all V
+class-map match-any V
+class-map type control-plane match-all V
+class-map type control-plane match-any V
+clock timezone V
+configure terminal
+control-plane
+copy running-config startup-config
+cryptographic-algorithm V
+deny V
+deny icmp any host V fragments log
+deny ip V V any log
+deny ip any V V log
+deny ip any any
+deny ip any any log
+deny tcp any any eq V log
+deny tcp any any eq tacacs log
+deny udp any any eq snmp log
+deny udp any any eq snmptrap log
+deny udp any any eq syslog log
+destination interface ethernet V
+encapsulation V
+encapsulation mpls
+end
+enforce-first-as
+event manager applet V
+event syslog pattern V*
+exec-timeout V
+exit
+feature dhcp
+feature ntp
+feature udld
+filter-list V in
+int V
+int V - V
+int V – V
+int range V – V
+int vlan V
+interface V
+interface V – V
+interface ethernet V
+interface vlan V
+ip V
+ip access-group V in
+ip access-group V out
+ip access-list V
+ip arp inspection vlan V
+ip as-path access-list V deny V
+ip as-path access-list V permit V
+ip authentication key-chain eigrp V
+ip authentication mode eigrp V
+ip dhcp snooping
+ip dhcp snooping vlan V
+ip igmp report-policy V
+ip igmp snooping
+ip igmp state-limit V
+ip msdp password V
+ip msdp peer V connect-source V remote-as nn
+ip msdp sa-limit V
+ip msdp sa-policy V prefix-list V in
+ip msdp sa-policy V prefix-list V out
+ip ospf authentication
+ip ospf authentication key-chain V
+ip ospf authentication message-digest
+ip ospf message-digest-key V
+ip pim jp-policy V in
+ip pim neighbor-policy prefix-list V
+ip pim register-policy V
+ip pim spt-threshold infinity group prefix-list V
+ip prefix-list V V deny V le V
+ip prefix-list V V permit V ge V
+ip prefix-list V deny V ge V
+ip prefix-list V deny V le V
+ip prefix-list V permit V
+ip prefix-list V permit V ge V le V
+ip prefix-list V permit V le V
+ip prefix-list V seq V deny V
+ip prefix-list V seq V deny V le V
+ip prefix-list V seq V permit V
+ip prefix-list V seq V permit V ge V
+ip rip authentication key-chain V
+ip rip authentication mode V
+ip rsvp
+ip verify source dhcp-snooping-vlan
+ip verify unicast source reachable-via any
+ip verify unicast source reachable-via rx
+isis authentication key-chain V
+isis authentication-type V
+key V
+key chain V
+key-string V
+key-string kxxxxxxxxxxxxx
+line console
+line vty
+logging ip access-list cache entries V
+logging level authpriv V
+logging logfile V
+logging logfile V V size V
+logging server V
+mac limit maximum addresses V
+match access-group name V*
+match ip address prefix-list V
+match ip dscp V
+match ip multicast group V
+match ip multicast group-range V to V
+match ip multicast source V
+match protocol arp
+maximum-prefix V
+member V
+member ethernet V service-instance V
+member vfi V
+monitor session V
+mpls ldp configuration
+mpls ldp sync
+neighbor V
+neighbor V password V
+neighbor V prefix-list V out
+no class class-default
+no disable-connected-check
+no enable
+no feature dhcp
+no feature imp
+no feature nxapi
+no feature telnet
+no feature wccp
+no ip arp gratuitous request
+no ip directed-broadcast
+no ip pim sparse-mode
+no ip proxy-arp
+no ip redirects
+no ip source-route
+no ip unreachables
+no lldp transmit
+no mpls ip propagate-ttl
+ntp authenticate
+ntp authentication-key V
+ntp commit
+ntp server V
+ntp server V key V
+ntp trusted-key V
+or
+password V
+password strength-check
+password yyyyyyyyy
+password zzzzzzzzzz
+permit eigrp any any
+permit icmp V V echo
+permit icmp V V echo-reply
+permit icmp any any
+permit icmp any any echo
+permit icmp any any echo-reply
+permit icmp any any time-exceeded
+permit icmp any any unreachable
+permit icmp any host V
+permit icmp host V host V echo
+permit icmp host V host V echo-reply
+permit igmp any V
+permit ip V any
+permit ip any any
+permit ospf any any
+permit ospf host V any
+permit pim host V any
+permit tcp V V any eq V
+permit tcp V V eq bgp
+permit tcp V eq bgp V
+permit tcp any V V eq V
+permit tcp any V V eq lpd
+permit tcp any V eq www
+permit tcp any any eq V
+permit tcp any any eq lpd
+permit tcp any any eq www
+permit tcp any any established
+permit tcp any host V eq V
+permit tcp any host V eq tacacs
+permit tcp host V eq bgp host V
+permit tcp host V eq tacacs any
+permit tcp host V host V eq bgp
+permit udp any any eq ntp
+permit udp any any eq rip
+permit udp any any eq snmp
+permit udp any host V eq ntp
+permit udp any host V eq snmp
+permit udp any host V eq snmptrap
+permit udp host V any eq snmp
+permit udp host V eq ntp any
+permit udp host V host V eq ntp
+permit …
+police V V conform-action drop exceed-action drop
+police V V conform-action transmit exceed-action drop
+police V V conform-action transmit exceed-action transmit
+policy-map V
+policy-map type control-plane V
+prefix-list V V out
+prefix-list V in
+priority percent V
+radius-server host V
+radius-server host V key V
+rd V
+remark V*
+route-map V deny
+route-map V deny V
+route-map V in
+route-map V permit
+route-map V permit V
+route-target export V
+route-target import V
+router bgp xx
+router eigrp V
+router isis
+router ospf V
+router-id V
+send-lifetime V
+server V
+service instance V ethernet
+service-policy input V
+service-policy output V
+session-limit V
+show interface trunk
+shutdown
+signaling refresh reduction
+snmp-server host V traps version V priv V
+snmp-server user V auth sha V priv V
+source interface ethernet V
+spanning-tree bpduguard enable
+spanning-tree guard root
+spanning-tree port type edge bpduguard default
+ssh ciphers V
+ssh login-attempts V
+ssh macs V
+storm-control broadcast level V
+storm-control unicast level V
+switch bgp V
+switch bgp nn
+switch(config)# username V password V role V
+switchport access vlan V
+switchport block unicast
+switchport mode access
+switchport trunk allowed vlan except V
+switchport trunk native vlan V
+update-source V
+vpn V
+vrf context V
+vtp password V

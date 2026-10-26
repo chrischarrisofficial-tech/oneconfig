@@ -1,0 +1,390 @@
+!
+! OneConfig | {{ net.name }} | {{ d.hostname }} ({{ d.role }}, NX-OS)
+! Replace every <ANGLE-BRACKET> placeholder before deploying.
+!
+hostname {{ d.hostname }}
+!
+{% if s.tacacs_servers %}
+feature tacacs+
+{% endif %}
+{% if uses.svi %}
+feature interface-vlan
+{% endif %}
+{% if uses.lacp %}
+feature lacp
+{% endif %}
+{% if d.role != 'router' %}
+feature udld
+{% endif %}
+{% if (s.dhcp_snooping and d.role != 'router') or uses.relay %}
+feature dhcp
+{% endif %}
+{% if s.port_security and not s.dot1x and uses.access %}
+feature port-security
+{% endif %}
+{% if s.dot1x and uses.access %}
+feature dot1x
+{% endif %}
+{% if d.ospf %}
+feature ospf
+{% endif %}
+{% if d.eigrp %}
+feature eigrp
+{% endif %}
+{% if d.bgp %}
+feature bgp
+{% endif %}
+no feature telnet
+!
+password strength-check
+! Local account of last resort, used only when the AAA servers are unreachable
+username <ADMIN-USER> password 0 <ADMIN-SECRET> role network-admin
+!
+ip domain-name {{ s.domain }}
+no ip domain-lookup
+no ip source-route
+!
+ssh login-attempts 3
+ssh macs hmac-sha2-256 hmac-sha2-512
+ssh ciphers aes256-ctr aes128-ctr
+! Generate SSH keys once from exec mode: ssh key rsa 2048 force
+!
+{% for t in s.tacacs_servers %}
+tacacs-server host {{ t }} key 0 <TACACS-KEY>
+{% endfor %}
+{% if s.tacacs_servers %}
+aaa group server tacacs+ TACACS-SERVERS
+{% for t in s.tacacs_servers %}
+  server {{ t }}
+{% endfor %}
+{% if mgmt_vrf %}
+  use-vrf management
+{% endif %}
+{% endif %}
+{% for r in s.radius_servers %}
+radius-server host {{ r }} key 0 <RADIUS-KEY>
+{% endfor %}
+{% if s.radius_servers %}
+aaa group server radius RADIUS-SERVERS
+{% for r in s.radius_servers %}
+  server {{ r }}
+{% endfor %}
+{% if mgmt_vrf %}
+  use-vrf management
+{% endif %}
+{% endif %}
+{% if login_group %}
+aaa authentication login default {{ login_group.strip() }}
+aaa authentication login console {{ login_group.strip() }}
+aaa authentication login default fallback error local
+aaa accounting default {{ login_group.strip() }}
+{% endif %}
+{% if s.dot1x and uses.access %}
+aaa authentication dot1x default group RADIUS-SERVERS
+{% endif %}
+!
+{% if d.role != 'router' %}
+{% for v in vlans %}
+vlan {{ v.id }}
+  name {{ v.name }}
+{% endfor %}
+!
+spanning-tree loopguard default
+{% if s.dhcp_snooping and user_vlans %}
+ip dhcp snooping
+ip dhcp snooping vlan {{ user_vlans }}
+{% endif %}
+{% if s.arp_inspection and user_vlans %}
+ip arp inspection vlan {{ user_vlans }}
+{% endif %}
+!
+{% endif %}
+{% if d.ospf and d.ospf.authenticate %}
+key chain OSPF-KEYS
+  key 1
+    key-string 0 <OSPF-KEY>
+    cryptographic-algorithm {{ 'hmac-sha-1' if ospf_sha1 else 'hmac-sha-256' }}
+    send-lifetime {{ lifetime }}
+    accept-lifetime {{ lifetime }}
+!
+{% endif %}
+{% if d.eigrp and d.eigrp.authenticate %}
+key chain EIGRP-KEYS
+  key 1
+    key-string 0 <EIGRP-KEY>
+    send-lifetime {{ lifetime }}
+    accept-lifetime {{ lifetime }}
+!
+{% endif %}
+{% for i in d.interfaces %}
+interface {{ i.name }}
+{% if i.description %}
+  description {{ i.description }}
+{% endif %}
+{% if i.mode == 'access' %}
+  switchport
+  switchport mode access
+  switchport access vlan {{ s.parking_vlan if i.shutdown else (i.access_vlan or 1) }}
+  switchport block unicast
+  spanning-tree port type edge
+  spanning-tree bpduguard enable
+{% if s.port_security and not s.dot1x %}{# NX-OS: 802.1X and port security can't share a port #}
+  switchport port-security maximum 1
+  switchport port-security violation restrict
+  switchport port-security mac-address sticky
+  switchport port-security
+{% endif %}
+{% if s.storm_control %}
+  storm-control broadcast level 5.00
+  storm-control multicast level 10.00
+{% endif %}
+{% if s.ip_source_guard %}
+  ip verify source dhcp-snooping-vlan
+{% endif %}
+{% if s.dot1x %}
+  dot1x port-control auto
+  dot1x host-mode single-host
+  dot1x mac-auth-bypass
+{% endif %}
+{% elif i.mode == 'trunk' %}
+  switchport
+  switchport mode trunk
+{% if s.native_vlan %}
+  switchport trunk native vlan {{ s.native_vlan }}
+{% endif %}
+  switchport trunk allowed vlan {{ trunk_vlans(i) }}
+{% if i.name in ctx.downlinks %}
+  spanning-tree guard root
+{% endif %}
+{% if s.dhcp_snooping %}
+  ip dhcp snooping trust
+{% endif %}
+{% if s.arp_inspection %}
+  ip arp inspection trust
+{% endif %}
+{% else %}
+{% if i.name.lower() == 'mgmt0' %}
+  vrf member management
+{% elif no_switchport(i) %}
+  no switchport
+{% endif %}
+{% if i.ip %}
+  ip address {{ i.ip }}
+{% endif %}
+{% if i.dhcp_helper %}
+  ip dhcp relay address {{ i.dhcp_helper }}
+{% endif %}
+{% if not i.name.lower().startswith(('mgmt', 'loopback')) %}
+  no ip redirects
+  no ip unreachables
+  no ip proxy-arp
+{% endif %}
+{% if i.external %}
+  no ip arp gratuitous request
+  no cdp enable
+  no lldp transmit
+  no lldp receive
+{% endif %}
+{% if i.name in ctx.internal %}
+  ip verify unicast source reachable-via rx
+{% endif %}
+{% if d.ospf and i.ospf_area is not none %}
+  ip router ospf {{ d.ospf.process_id }} area {{ area_id(i.ospf_area) }}
+{% if i.name in ospf_active %}
+  no ip ospf passive-interface
+{% if d.ospf.authenticate %}
+  ip ospf authentication key-chain OSPF-KEYS
+{% endif %}
+{% endif %}
+{% endif %}
+{% if i.name in eigrp_active %}
+  ip router eigrp ONECONFIG
+{% if d.eigrp.authenticate %}
+  ip authentication mode eigrp ONECONFIG md5
+  ip authentication key-chain eigrp ONECONFIG EIGRP-KEYS
+{% endif %}
+{% endif %}
+{% endif %}
+{% if i.channel_group %}
+  channel-group {{ i.channel_group }} mode active
+{% endif %}
+{% if acl_in(i) %}
+  ip access-group {{ acl_in(i) }} in
+{% elif i.name.lower() == 'mgmt0' and s.mgmt_subnet %}
+  ip access-group MGMT-ACCESS in
+{% endif %}
+{% if acl_out(i) %}
+  ip access-group {{ acl_out(i) }} out
+{% endif %}
+  {{ 'shutdown' if i.shutdown else 'no shutdown' }}
+!
+{% endfor %}
+{% if d.ospf %}
+router ospf {{ d.ospf.process_id }}
+{% if d.ospf.router_id %}
+  router-id {{ d.ospf.router_id }}
+{% endif %}
+  auto-cost reference-bandwidth {{ d.ospf.reference_bw }}
+  passive-interface default
+!
+{% endif %}
+{% if d.eigrp %}
+router eigrp ONECONFIG
+  autonomous-system {{ d.eigrp.asn }}
+{% if d.eigrp.router_id %}
+  router-id {{ d.eigrp.router_id }}
+{% endif %}
+!
+{% endif %}
+{% if ebgp %}
+{% for b in bogons %}
+ip prefix-list BGP-IN seq {{ loop.index * 5 }} deny {{ b }} le 32
+{% endfor %}
+{% for p in d.bgp.networks %}
+ip prefix-list BGP-IN seq {{ 100 + loop.index * 5 }} deny {{ p }} le 32
+{% endfor %}
+ip prefix-list BGP-IN seq 500 permit 0.0.0.0/0 ge 8 le 24
+{% for p in d.bgp.networks %}
+ip prefix-list BGP-OUT seq {{ loop.index * 5 }} permit {{ p }}
+{% else %}
+ip prefix-list BGP-OUT seq 5 deny 0.0.0.0/0 le 32
+{% endfor %}
+!
+{% endif %}
+{% if d.bgp %}
+router bgp {{ d.bgp.asn }}
+{% if d.bgp.router_id %}
+  router-id {{ d.bgp.router_id }}
+{% endif %}
+  log-neighbor-changes
+  enforce-first-as
+{% if d.bgp.networks %}
+  address-family ipv4 unicast
+{% for p in d.bgp.networks %}
+    network {{ p }}
+{% endfor %}
+{% endif %}
+{% for n in d.bgp.neighbors %}
+  neighbor {{ n.ip }}
+    remote-as {{ n.remote_as }}
+{% if n.description %}
+    description {{ n.description }}
+{% endif %}
+{% if n.authenticate %}
+    password 0 <BGP-AS{{ n.remote_as }}-KEY>
+{% endif %}
+{% if update_source(n) %}
+    update-source {{ update_source(n) }}
+{% endif %}
+    address-family ipv4 unicast
+{% if n.remote_as != d.bgp.asn %}
+      prefix-list BGP-IN in
+      prefix-list BGP-OUT out
+{% if n.max_prefix %}
+      maximum-prefix {{ n.max_prefix }} 90 restart 15
+{% endif %}
+{% endif %}
+{% endfor %}
+!
+{% endif %}
+{% for r in d.static_routes %}
+ip route {{ r.prefix }} {{ r.next_hop }}{% if r.name %} name {{ r.name }}{% endif %}
+
+{% endfor %}
+{% for a in d.acls %}
+ip access-list {{ a.name }}
+{% for e in a.entries %}
+  {{ loop.index * 10 }} {{ e }}
+{% endfor %}
+!
+{% endfor %}
+{% if needs_external_in %}
+ip access-list EXTERNAL-IN
+{% for i in d.interfaces if i.external and i.ip %}
+  deny icmp any host {{ i.ip.ip }} fragments log
+{% endfor %}
+{% for n in ebgp %}
+  permit tcp {{ n.ip }}/32 any eq bgp
+  permit tcp {{ n.ip }}/32 eq bgp any
+{% endfor %}
+{% for b in bogons %}
+  deny ip {{ b }} any log
+{% endfor %}
+  permit tcp any any established
+  permit icmp any any echo-reply
+  permit icmp any any time-exceeded
+  permit icmp any any unreachable
+  deny ip any any log
+!
+{% endif %}
+{% if needs_external_out %}
+ip access-list EXTERNAL-OUT
+  deny tcp any any eq tacacs log
+  deny tcp any any eq 22 log
+  deny udp any any eq snmp log
+  deny udp any any eq snmptrap log
+  deny udp any any eq syslog log
+  permit ip any any
+!
+{% endif %}
+{% if needs_egress %}
+ip access-list EGRESS-FILTER
+{% for n in internal_nets %}
+  permit ip {{ n }} any
+{% endfor %}
+  deny ip any any log
+!
+{% endif %}
+{% if s.mgmt_subnet %}
+ip access-list MGMT-ACCESS
+  10 permit ip {{ s.mgmt_subnet }} any
+  20 deny ip any any log
+!
+{% endif %}
+{% if s.copp %}
+copp profile strict
+!
+{% endif %}
+logging logfile messages 6 size 4096
+logging ip access-list cache entries 8000
+logging level authpriv 6
+{% for h in s.syslog_servers %}
+logging server {{ h }} 6{{ mgmt_vrf }}
+{% endfor %}
+clock timezone UTC 0 0
+{% if s.ntp_servers %}
+ntp authentication-key 1 md5 <NTP-KEY>
+ntp authenticate
+ntp trusted-key 1
+{% for n in s.ntp_servers %}
+ntp server {{ n }} key 1{{ mgmt_vrf }}
+{% endfor %}
+{% endif %}
+{% if s.snmpv3 %}
+!
+snmp-server user <SNMP-USER> auth sha <SNMP-AUTH-PASS> priv aes-128 <SNMP-PRIV-PASS>
+{% endif %}
+{% if s.backup_server %}
+!
+event manager applet BACKUP_CONFIG
+  event syslog pattern "SYSLOG_CONFIG_I"
+  action 1 cli copy running-config scp://<BACKUP-USER>@{{ s.backup_server }}/{{ d.hostname }}.cfg{{ ' vrf management' if mgmt_vrf else '' }}
+  action 2 syslog priority informational msg "Configuration backup was executed"
+{% endif %}
+!
+{% if s.dod_banner %}
+banner motd ^
+{{ dod_banner }}
+^
+{% else %}
+banner motd ^{{ s.banner }}^
+{% endif %}
+!
+line console
+  exec-timeout 5
+line vty
+  exec-timeout 5
+  session-limit 2
+{% if s.mgmt_subnet %}
+  access-class MGMT-ACCESS in
+{% endif %}

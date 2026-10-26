@@ -1,0 +1,21 @@
+fpc0:
+--------------------------------------------------------------------------
+Hostname: JUN-ACC1
+Model: ex4550-32f
+JUNOS EX  Software Suite [22.4R3.25]
+JUNOS FIPS mode utilities [22.4R3.25]
+JUNOS Online Documentation [22.4R3.25]
+JUNOS EX 4500 Software Suite [22.4R3.25]
+JUNOS Web Management [22.4R3.25]
+
+fpc1:
+--------------------------------------------------------------------------
+Hostname: JUN-ACC1
+Model: ex4550-32f
+JUNOS EX  Software Suite [22.4R3.25]
+JUNOS FIPS mode utilities [22.4R3.25]
+JUNOS Online Documentation [22.4R3.25]
+JUNOS EX 4500 Software Suite [22.4R3.25]
+JUNOS Web Management [22.4R3.25]
+
+{master:0}

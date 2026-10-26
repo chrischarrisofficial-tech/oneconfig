@@ -1,0 +1,481 @@
+!
+! OneConfig | {{ net.name }} | {{ d.hostname }} ({{ d.role }}, IOS-XE)
+! Replace every <ANGLE-BRACKET> placeholder before deploying.
+!
+hostname {{ d.hostname }}
+!
+service password-encryption
+service timestamps debug datetime msec localtime show-timezone
+service timestamps log datetime msec localtime show-timezone
+service tcp-keepalives-in
+service tcp-keepalives-out
+no service pad
+no service config
+no ip http server
+no ip http secure-server
+no ip bootp server
+no ip dns server
+no ip source-route
+no ip gratuitous-arps
+no ip domain lookup
+ip domain name {{ s.domain }}
+!
+enable algorithm-type scrypt secret <ENABLE-SECRET>
+!
+aaa new-model
+aaa common-criteria policy PASSWORD_POLICY
+ min-length 15
+ upper-case 1
+ lower-case 1
+ numeric-count 1
+ special-case 1
+ char-changes 8
+!
+! Local account of last resort, used only when the AAA servers are unreachable
+username <ADMIN-USER> privilege 15 common-criteria-policy PASSWORD_POLICY algorithm-type scrypt secret <ADMIN-SECRET>
+!
+{% for t in s.tacacs_servers %}
+tacacs server TACACS-{{ loop.index }}
+ address ipv4 {{ t }}
+ key <TACACS-KEY>
+{% endfor %}
+{% if s.tacacs_servers %}
+aaa group server tacacs+ TACACS-SERVERS
+{% for t in s.tacacs_servers %}
+ server name TACACS-{{ loop.index }}
+{% endfor %}
+!
+{% endif %}
+{% for r in s.radius_servers %}
+radius server RADIUS-{{ loop.index }}
+ address ipv4 {{ r }} auth-port 1812 acct-port 1813
+ key <RADIUS-KEY>
+{% endfor %}
+{% if s.radius_servers %}
+aaa group server radius RADIUS-SERVERS
+{% for r in s.radius_servers %}
+ server name RADIUS-{{ loop.index }}
+{% endfor %}
+!
+{% endif %}
+aaa authentication login default {{ login_group }}local
+aaa authorization exec default {{ login_group }}local{% if login_group %} if-authenticated{% endif %}
+
+{% if s.tacacs_servers %}
+aaa accounting exec default start-stop group TACACS-SERVERS
+aaa accounting commands 15 default start-stop group TACACS-SERVERS
+{% endif %}
+{% if s.dot1x and d.role != 'router' %}
+aaa authentication dot1x default group RADIUS-SERVERS
+aaa authorization network default group RADIUS-SERVERS
+dot1x system-auth-control
+{% endif %}
+!
+login block-for 900 attempts 3 within 120
+login on-failure log
+login on-success log
+!
+ip ssh version 2
+ip ssh time-out 60
+ip ssh authentication-retries 3
+ip ssh server algorithm mac hmac-sha2-512 hmac-sha2-256
+ip ssh server algorithm encryption aes256-ctr aes192-ctr aes128-ctr
+! Generate SSH keys once from exec mode: crypto key generate rsa modulus 4096
+!
+archive
+ path flash:oneconfig-archive
+ maximum 14
+ log config
+  logging enable
+  logging size 1000
+  notify syslog contenttype plaintext
+  hidekeys
+!
+logging userinfo
+!
+{% if d.role != 'router' %}
+vtp mode off
+{% for v in vlans %}
+vlan {{ v.id }}
+ name {{ v.name }}
+{% endfor %}
+!
+spanning-tree mode rapid-pvst
+spanning-tree extend system-id
+spanning-tree loopguard default
+udld enable
+{% if s.dhcp_snooping and user_vlans %}
+ip dhcp snooping vlan {{ user_vlans }}
+no ip dhcp snooping information option
+ip dhcp snooping
+{% endif %}
+{% if s.arp_inspection and user_vlans %}
+ip arp inspection vlan {{ user_vlans }}
+{% endif %}
+!
+{% endif %}
+{% if d.role == 'l3switch' %}
+ip routing
+!
+{% endif %}
+{% if d.ospf and d.ospf.authenticate %}
+key chain OSPF-KEYS
+ key 1
+  key-string <OSPF-KEY>
+  cryptographic-algorithm {{ 'hmac-sha-1' if ospf_sha1 else 'hmac-sha-256' }}
+  send-lifetime {{ lifetime }}
+  accept-lifetime {{ lifetime }}
+!
+{% endif %}
+{% for asn in bgp_as %}
+key chain BGP-AS{{ asn }} tcp
+ key 1
+  send-id 1
+  recv-id 1
+  key-string <BGP-AS{{ asn }}-KEY>
+  cryptographic-algorithm hmac-sha-256
+  send-lifetime {{ lifetime }}
+  accept-lifetime {{ lifetime }}
+!
+{% endfor %}
+{% if d.role != 'router' %}
+interface Vlan1
+ no ip address
+ shutdown
+!
+{% endif %}
+{% for i in d.interfaces %}
+interface {{ i.name }}
+{% if i.description %}
+ description {{ i.description }}
+{% endif %}
+{% if i.mode == 'access' %}
+ switchport mode access
+ switchport access vlan {{ s.parking_vlan if i.shutdown else (i.access_vlan or 1) }}
+{% if i.voice_vlan %}
+ switchport voice vlan {{ i.voice_vlan }}
+{% endif %}
+ switchport nonegotiate
+ switchport block unicast
+ spanning-tree portfast
+ spanning-tree bpduguard enable
+{% if s.port_security %}
+ switchport port-security maximum {{ 2 if i.voice_vlan else 1 }}
+ switchport port-security violation restrict
+ switchport port-security mac-address sticky
+ switchport port-security
+{% endif %}
+{% if s.storm_control %}
+ storm-control broadcast level 5.00
+ storm-control multicast level 10.00
+{% endif %}
+{% if s.dhcp_snooping %}
+ ip dhcp snooping limit rate 15
+{% endif %}
+{% if s.ip_source_guard %}
+ ip verify source
+{% endif %}
+{% if s.dot1x %}
+ authentication host-mode {{ 'multi-domain' if i.voice_vlan else 'single-host' }}
+ authentication port-control auto
+ mab
+ dot1x pae authenticator
+{% endif %}
+{% elif i.mode == 'trunk' %}
+ switchport mode trunk
+ switchport nonegotiate
+ switchport trunk allowed vlan {{ trunk_vlans(i) }}
+{% if s.native_vlan %}
+ switchport trunk native vlan {{ s.native_vlan }}
+{% endif %}
+{% if i.name in ctx.downlinks %}
+ spanning-tree guard root
+{% endif %}
+{% if s.dhcp_snooping %}
+ ip dhcp snooping trust
+{% endif %}
+{% if s.arp_inspection %}
+ ip arp inspection trust
+{% endif %}
+{% else %}
+{% if no_switchport(i) %}
+ no switchport
+{% endif %}
+{% if i.ip %}
+ ip address {{ i.ip.ip }} {{ i.ip.netmask }}
+{% endif %}
+{% if i.dhcp_helper %}
+ ip helper-address {{ i.dhcp_helper }}
+{% endif %}
+ no ip redirects
+ no ip unreachables
+ no ip proxy-arp
+{% if i.external %}
+ no cdp enable
+ no lldp transmit
+ no lldp receive
+{% endif %}
+{% if i.name in ctx.internal %}
+ ip verify unicast source reachable-via rx
+{% endif %}
+{% if d.ospf and i.ospf_area is not none %}
+ ip ospf {{ d.ospf.process_id }} area {{ i.ospf_area }}
+{% if d.ospf.authenticate and i.name in ospf_active %}
+ ip ospf authentication key-chain OSPF-KEYS
+{% endif %}
+{% endif %}
+{% endif %}
+{% if i.channel_group %}
+ channel-group {{ i.channel_group }} mode active
+{% endif %}
+{% if acl_in(i) %}
+ ip access-group {{ acl_in(i) }} in
+{% endif %}
+{% if acl_out(i) %}
+ ip access-group {{ acl_out(i) }} out
+{% endif %}
+ {{ 'shutdown' if i.shutdown else 'no shutdown' }}
+!
+{% endfor %}
+{% if null0 %}
+interface Null0
+ no ip unreachables
+!
+{% endif %}
+{% if d.ospf %}
+router ospf {{ d.ospf.process_id }}
+{% if d.ospf.router_id %}
+ router-id {{ d.ospf.router_id }}
+{% endif %}
+ auto-cost reference-bandwidth {{ d.ospf.reference_bw }}
+ passive-interface default
+{% for n in ospf_active %}
+ no passive-interface {{ n }}
+{% endfor %}
+!
+{% endif %}
+{% if d.eigrp %}
+router eigrp ONECONFIG
+ address-family ipv4 unicast autonomous-system {{ d.eigrp.asn }}
+{% if d.eigrp.router_id %}
+  eigrp router-id {{ d.eigrp.router_id }}
+{% endif %}
+{% for n in d.eigrp.networks %}
+  network {{ n.network_address }} {{ n.hostmask }}
+{% endfor %}
+  af-interface default
+   passive-interface
+  exit-af-interface
+{% for n in eigrp_active %}
+  af-interface {{ n }}
+   no passive-interface
+{% if d.eigrp.authenticate %}
+   authentication mode hmac-sha-256 <EIGRP-KEY>
+{% endif %}
+  exit-af-interface
+{% endfor %}
+ exit-address-family
+!
+{% endif %}
+{% if ebgp %}
+{% for b in bogons %}
+ip prefix-list BGP-IN seq {{ loop.index * 5 }} deny {{ b }} le 32
+{% endfor %}
+{% for p in d.bgp.networks %}
+ip prefix-list BGP-IN seq {{ 100 + loop.index * 5 }} deny {{ p }} le 32
+{% endfor %}
+ip prefix-list BGP-IN seq 500 permit 0.0.0.0/0 ge 8 le 24
+{% for p in d.bgp.networks %}
+ip prefix-list BGP-OUT seq {{ loop.index * 5 }} permit {{ p }}
+{% else %}
+ip prefix-list BGP-OUT seq 5 deny 0.0.0.0/0 le 32
+{% endfor %}
+!
+{% endif %}
+{% if d.bgp %}
+router bgp {{ d.bgp.asn }}
+{% if d.bgp.router_id %}
+ bgp router-id {{ d.bgp.router_id }}
+{% endif %}
+ bgp log-neighbor-changes
+ no bgp default ipv4-unicast
+{% for n in d.bgp.neighbors %}
+ neighbor {{ n.ip }} remote-as {{ n.remote_as }}
+{% if n.description %}
+ neighbor {{ n.ip }} description {{ n.description }}
+{% endif %}
+{% if update_source(n) %}
+ neighbor {{ n.ip }} update-source {{ update_source(n) }}
+{% endif %}
+{% if n.authenticate %}
+ neighbor {{ n.ip }} ao BGP-AS{{ n.remote_as }}
+{% endif %}
+{% if n.remote_as != d.bgp.asn %}
+ neighbor {{ n.ip }} ttl-security hops 1
+{% endif %}
+{% endfor %}
+ !
+ address-family ipv4
+{% for p in d.bgp.networks %}
+  network {{ p.network_address }} mask {{ p.netmask }}
+{% endfor %}
+{% for n in d.bgp.neighbors %}
+  neighbor {{ n.ip }} activate
+{% if n.remote_as != d.bgp.asn %}
+  neighbor {{ n.ip }} prefix-list BGP-IN in
+  neighbor {{ n.ip }} prefix-list BGP-OUT out
+{% if n.max_prefix %}
+  neighbor {{ n.ip }} maximum-prefix {{ n.max_prefix }} 90 restart 15
+{% endif %}
+{% endif %}
+{% endfor %}
+ exit-address-family
+!
+{% endif %}
+{% for r in d.static_routes %}
+ip route {{ r.prefix.network_address }} {{ r.prefix.netmask }} {{ r.next_hop }}{% if r.name %} name {{ r.name }}{% endif %}
+
+{% endfor %}
+{% for a in d.acls %}
+ip access-list extended {{ a.name }}
+{% for e in a.entries %}
+ {{ e }}
+{% endfor %}
+!
+{% endfor %}
+{% if needs_external_in %}
+ip access-list extended EXTERNAL-IN
+ deny ip any any option any-options log-input
+{% for n in ebgp %}
+ permit tcp host {{ n.ip }} any eq bgp
+ permit tcp host {{ n.ip }} eq bgp any
+{% endfor %}
+{% for b in bogons %}
+ deny ip {{ b.network_address }} {{ b.hostmask }} any log-input
+{% endfor %}
+ permit tcp any any established
+ permit icmp any any echo-reply
+ permit icmp any any time-exceeded
+ permit icmp any any unreachable
+ deny ip any any log-input
+!
+{% endif %}
+{% if needs_external_out %}
+ip access-list extended EXTERNAL-OUT
+ deny tcp any any eq tacacs log-input
+ deny tcp any any eq 22 log-input
+ deny udp any any eq snmp log-input
+ deny udp any any eq snmptrap log-input
+ deny udp any any eq syslog log-input
+ permit ip any any
+!
+{% endif %}
+{% if needs_egress %}
+ip access-list extended EGRESS-FILTER
+{% for n in internal_nets %}
+ permit ip {{ n.network_address }} {{ n.hostmask }} any
+{% endfor %}
+ deny ip any any log-input
+!
+{% endif %}
+{% if s.mgmt_subnet %}
+ip access-list standard MGMT-ACCESS
+ permit {{ s.mgmt_subnet.network_address }} {{ s.mgmt_subnet.hostmask }}
+ deny any log
+!
+{% endif %}
+{% if s.copp and d.role == 'router' %}
+ip access-list extended COPP-ROUTING
+ permit tcp any any eq bgp
+ permit tcp any eq bgp any
+ permit ospf any any
+ permit eigrp any any
+ip access-list extended COPP-MANAGEMENT
+ permit tcp any any eq 22
+ permit udp any any eq snmp
+ permit udp any eq ntp any
+ permit tcp any eq tacacs any
+ permit udp any eq 1812 any
+ permit udp any eq 1813 any
+ip access-list extended COPP-ICMP
+ permit icmp any any
+class-map match-all COPP-ROUTING
+ match access-group name COPP-ROUTING
+class-map match-all COPP-MANAGEMENT
+ match access-group name COPP-MANAGEMENT
+class-map match-all COPP-ICMP
+ match access-group name COPP-ICMP
+policy-map COPP
+ class COPP-ROUTING
+ class COPP-MANAGEMENT
+  police cir 1000000 conform-action transmit exceed-action drop
+ class COPP-ICMP
+  police cir 128000 conform-action transmit exceed-action drop
+ class class-default
+  police cir 1000000 conform-action transmit exceed-action drop
+control-plane
+ service-policy input COPP
+!
+{% endif %}
+logging buffered 64000 informational
+{% for h in s.syslog_servers %}
+logging host {{ h }}
+{% endfor %}
+{% if s.syslog_servers %}
+logging trap informational
+{% endif %}
+{% if s.ntp_servers %}
+ntp authentication-key 1 hmac-sha2-256 <NTP-KEY>
+ntp authenticate
+ntp trusted-key 1
+{% for n in s.ntp_servers %}
+ntp server {{ n }} key 1
+{% endfor %}
+{% endif %}
+{% if s.snmpv3 %}
+!
+snmp-server view ONECONFIG-VIEW iso included
+snmp-server group ONECONFIG-RO v3 priv read ONECONFIG-VIEW{% if s.mgmt_subnet %} access MGMT-ACCESS{% endif %}
+
+snmp-server user <SNMP-USER> ONECONFIG-RO v3 auth sha <SNMP-AUTH-PASS> priv aes 256 <SNMP-PRIV-PASS>
+{% endif %}
+{% if s.backup_server %}
+!
+event manager applet BACKUP_CONFIG
+ event syslog pattern "%SYS-5-CONFIG_I"
+ action 1 info type routername
+ action 2 cli command "enable"
+ action 3 cli command "copy run scp" pattern "remote host"
+ action 4 cli command "{{ s.backup_server }}" pattern "filename"
+ action 5 cli command "$_info_routername-config"
+ action 6 syslog priority informational msg "Configuration backup was executed"
+{% endif %}
+!
+{% if s.dod_banner %}
+banner login ^
+{{ dod_banner }}
+^
+{% else %}
+banner login ^{{ s.banner }}^
+{% endif %}
+!
+line con 0
+ exec-timeout 5 0
+ logging synchronous
+{% if d.role == 'router' %}
+line aux 0
+ no exec
+ transport input none
+{% endif %}
+line vty 0 1
+{% if s.mgmt_subnet %}
+ access-class MGMT-ACCESS in
+{% endif %}
+ exec-timeout 5 0
+ transport input ssh
+ transport output ssh
+line vty 2 15
+ transport input none
+ transport output none
+!
+end

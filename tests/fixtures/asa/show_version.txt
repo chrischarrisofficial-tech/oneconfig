@@ -1,0 +1,34 @@
+
+Cisco Adaptive Security Appliance Software Version 9.18(4)22 
+SSP Operating System Version 2.12(1.62)
+Device Manager Version 7.20(1)
+
+Compiled on Wed 13-Mar-24 14:42 GMT by builders
+System image file is "disk0:/asa9-18-4-22-lfbff-k8.SPA"
+Config file at boot was "startup-config"
+
+EDGE-FW1 up 41 days 3 hours
+failover cluster up 41 days 3 hours
+
+Hardware:   ASA5516, 8192 MB RAM, CPU Atom C2000 series 2416 MHz, 1 CPU (8 cores)
+Internal ATA Compact Flash, 8192MB
+BIOS Flash M25P64 @ 0xfed01000, 16384KB
+
+Encryption hardware device : Cisco ASA Crypto on-board accelerator (revision 0x1)
+                             Number of accelerators: 1
+
+ 1: Ext: GigabitEthernet1/1  : address is 00a2.ee11.2201, irq 255
+ 2: Ext: GigabitEthernet1/2  : address is 00a2.ee11.2202, irq 255
+ 3: Ext: GigabitEthernet1/3  : address is 00a2.ee11.2203, irq 255
+ 4: Ext: GigabitEthernet1/8  : address is 00a2.ee11.2208, irq 255
+ 5: Int: Internal-Data1/1    : address is 00a2.ee11.2200, irq 255
+ 6: Ext: Management1/1       : address is 00a2.ee11.2200, irq 0
+
+Licensed features for this platform:
+Maximum Physical Interfaces       : Unlimited      perpetual
+Maximum VLANs                     : 150            perpetual
+Failover                          : Active/Active  perpetual
+
+Serial Number: JAD2049011T
+Configuration register is 0x1
+Configuration last modified by enable_15 at 09:12:44.120 UTC Tue Oct 6 2026

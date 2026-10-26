@@ -1,0 +1,24 @@
+# Python
+.venv/
+__pycache__/
+*.py[cod]
+*.egg-info/
+.pytest_cache/
+
+# Builds (PyInstaller app, wheels)
+build/
+dist/
+
+# Local editor and tool settings (hold paths on this computer)
+.claude/
+.vscode/
+.idea/
+
+# macOS
+.DS_Store
+
+# Never commit OneConfig state or secrets, should any land here by mistake
+.oneconfig/
+*.cfg.enc
+*.jsonl
+.env

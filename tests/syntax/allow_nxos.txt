@@ -1,0 +1,11 @@
+# Lines Batfish's NX-OS grammar does not model and DISA's fix text does not show, checked against vendor or CIS docs.
+# shape | source
+feature port-security | https://developer.cisco.com/docs/nx-os-n3k-n9k-api-ref-7-x/configuring-port-security
+switchport port-security | https://www.cisco.com/c/en/us/td/docs/switches/datacenter/nexus7000/sw/security/config/cisco_nexus7000_security_config_guide_8x/configuring_port_security.html
+switchport port-security maximum V | (same guide)
+switchport port-security violation restrict | (same guide)
+switchport port-security mac-address sticky | (same guide)
+feature dot1x | https://www.cisco.com/c/en/us/td/docs/dcn/nx-os/nexus9000/102x/configuration/Security/cisco-nexus-9000-nx-os-security-configuration-guide-102x/m-configuring-8021x.html
+dot1x mac-auth-bypass | (same guide)
+ip dhcp snooping trust | CIS Cisco NX-OS Benchmark v1.2.0, 3.3.1 Configure DHCP Trust
+copp profile strict | CIS Cisco NX-OS Benchmark v1.1.0, 2.1.1 Configure Control Plane Policing

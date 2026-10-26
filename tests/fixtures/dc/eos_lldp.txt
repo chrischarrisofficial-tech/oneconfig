@@ -1,0 +1,20 @@
+Interface Ethernet1 detected 1 LLDP neighbors:
+
+  Neighbor 5087.89a1.d8d6/"Ethernet1/1", age 12 seconds
+  Discovered 0:01:11 ago; Last changed 0:01:11 ago
+  - Chassis ID type: MAC address (4)
+    Chassis ID     : 5087.89a1.d8d6
+  - Port ID type: Interface name (5)
+    Port ID     : "Ethernet1/1"
+  - Time To Live: 120 seconds
+  - System Name: "DC-SPINE1"
+  - System Description: "Cisco Nexus Operating System (NX-OS) Software 10.3(4a)"
+  - System Capabilities : Bridge, Router
+    Enabled Capabilities: Bridge, Router
+  - Management Address Subtype: IPv4
+    Management Address        : 10.99.1.1
+    Interface Number Subtype  : ifIndex (2)
+    Interface Number          : 83886080
+    OID String                : 
+  - IEEE802.1 Port VLAN ID: 1
+  - IEEE802.3 Maximum Frame Size: 9216 bytes
