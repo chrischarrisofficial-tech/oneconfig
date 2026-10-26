@@ -2,4 +2,4 @@
 # The three advisories fixed in 49/50 are in X.509 path validation and PKCS7 decryption, which OneConfig
 # doesn't use (it uses Fernet only). Everywhere else the lock takes the current release.
 cryptography<49 ; sys_platform == "darwin" and platform_machine == "x86_64"
-cryptography>=50 ; sys_platform != "darwin" or platform_machine != "x86_64"
+cryptography>=50.0.2 ; sys_platform != "darwin" or platform_machine != "x86_64"

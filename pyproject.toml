@@ -5,12 +5,12 @@ description = "Visual router and switch config builder with security audit"
 requires-python = ">=3.10"
 license = "MIT"
 license-files = ["LICENSE", "NOTICE"]
-dependencies = ["jinja2>=3.1", "pydantic>=2.6"]
+dependencies = ["jinja2>=3.1.6", "pydantic>=2.14.1"]
 
 [project.optional-dependencies]
-discover = ["netmiko>=4.4", "pysnmp>=7.1", "pyserial>=3.5", "keyring>=24", "cryptography>=42"]  # Discover and Push (cryptography: encrypted backups)
-app = ["pywebview>=5", "pyinstaller>=6", "oneconfig[discover]"]  # the macOS app: packaging/OneConfig.spec
-dev = ["pytest", "snmpsim>=1.2", "pysmi", "playwright", "oneconfig[discover]"]
+discover = ["netmiko>=4.8.0", "pysnmp>=7.1.30", "pyserial>=3.5", "keyring>=25.7.0", "cryptography>=50.0.2"]  # Discover and Push (cryptography: encrypted backups)
+app = ["pywebview>=6.2.1", "pyinstaller>=6.22.3", "oneconfig[discover]"]  # the macOS app: packaging/OneConfig.spec
+dev = ["pytest", "snmpsim>=1.2.2", "pysmi", "playwright", "oneconfig[discover]"]
 
 [project.scripts]
 oneconfig = "oneconfig.__main__:main"
