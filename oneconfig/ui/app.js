@@ -394,7 +394,7 @@ $("#trash").addEventListener("click", () => {
   hint(t); setTimeout(() => $("#hint").textContent === t && hint(), 3000);
 });
 svg.addEventListener("keydown", e => { if (e.key === "Enter" && e.target.closest(".node")) nodeClick(e.target.closest(".node").dataset.h); });
-window.addEventListener("resize", () => { drawCanvas(); fitTiles(); });
+window.addEventListener("resize", () => { fitScreen(); drawCanvas(); });
 
 function openPanel(on = true) { document.body.classList.toggle("panel-open", on); }  // only matters when the panel is a drawer
 function nodeClick(name) {
@@ -1539,6 +1539,7 @@ const PRESETS = {
   "Minimal":[["health","t"],["selected","t"]],
 };
 let PREF = {theme:"diorama", preset:"Overview", layouts:{}, local_only:true}, editing = false, dragW = null, prefTimer = null;
+const WIDE = matchMedia("(min-width: 901px)");  // above this the dashboard fits the window (fitScreen); below, tiles stack and scroll
 const MAXW = 12;  // widgets per layout: about one screen. More goes in another layout (the server refuses more too)
 const ENG = ["linkchecks", "pushready", "vlans", "routes", "versions", "fwrules", "backups", "ipplan"];
 function capLayouts() {  // a saved layout over the limit: engineering widgets move to Engineering, anything still over to "<name> more"
@@ -1587,8 +1588,10 @@ function renderDash() {
     h("div", {class:"items"}, L.length >= MAXW ? h("span", {class:"sub"}, `This layout holds ${MAXW} widgets, the most it can. Remove one to add another, or save a new layout.`)
       : hidden.length ? hidden.map(k => h("button", {class:"chipbtn", onclick:() => { if (L.length < MAXW) { L.push([k, WID[k].sz[0]]); savePrefs(); renderDash(); } }}, "+ " + WID[k].t))
       : h("span", {class:"sub"}, "Every widget is on this layout.")));
-  $("#dash").replaceChildren($("#stage"), ...tiles, lib);
-  fitTiles();
+  const dash = $("#dash"), top = dash.scrollTop;  // a rebuild empties the grid for a moment, which scrolls it to the top
+  dash.replaceChildren($("#stage"), ...tiles, lib);
+  fitScreen();
+  dash.scrollTop = top;
 }
 // Widgets marked fit take as many grid rows as their content needs (up to 4 tile units, then the list scrolls), so short lists leave no empty space
 function fitTiles() {
@@ -1598,10 +1601,29 @@ function fitTiles() {
     const cs = getComputedStyle(el), list = el.querySelector(".list");
     const kids = [...el.children], fixed = kids.filter(k => k !== list).reduce((n, k) => n + k.offsetHeight, 0);
     const need = parseFloat(cs.paddingTop) + parseFloat(cs.paddingBottom) + fixed + (list ? list.scrollHeight : 0) + (kids.length - 1) * (parseFloat(cs.rowGap) || 0);
-    el.style.gridRow = `span ${Math.max(4, Math.min(16, Math.ceil((need + gap) / (row + gap))))}`;  // 1 to 4 tile units, in quarter steps
+    // 1 to 4 tile units, in quarter steps; when the dashboard fits the screen, never past the tile's own size (its list scrolls)
+    const most = WIDE.matches ? (el.matches(".t, .l") ? 8 : 4) : 16;
+    el.style.gridRow = `span ${Math.max(4, Math.min(most, Math.ceil((need + gap) / (row + gap))))}`;
   }
   const lib = $("#dash .lib");  // the Customize panel: as tall as its content
   if (lib && editing) { lib.style.gridRow = "span 1"; lib.style.gridRow = `span ${Math.ceil((lib.scrollHeight + gap) / (row + gap))}`; }
+}
+// Size the rows so the map and every widget fit the window without scrolling: as many tile units as the layout needs
+// (8 at least), down to the 64px a tile still reads at. Narrow windows stack the tiles under the map and scroll as before;
+// the Customize panel sits below the tiles and scrolls into view.
+function fitScreen() {
+  const dash = $("#dash"), stage = $("#stage"), was = [stage.clientWidth, stage.clientHeight];
+  dash.style.setProperty("--units", 8);
+  fitTiles();
+  if (WIDE.matches) for (let k = 0; k < 4; k++) {  // fit tiles take more rows when rows shrink, so settle in a few passes
+    const g = getComputedStyle(dash), row = parseFloat(g.gridAutoRows), gap = parseFloat(g.rowGap), top = dash.getBoundingClientRect().top + parseFloat(g.paddingTop);
+    const bottom = dash.scrollTop + Math.max(...[...dash.querySelectorAll("#stage, .w[data-w]")].map(el => el.getBoundingClientRect().bottom));  // as if unscrolled
+    const need = Math.max(8, Math.ceil(Math.round((bottom - top + gap) / (row + gap)) / 4)), now = +g.getPropertyValue("--units");
+    if (need <= now || 4 * row + 3 * gap <= 64.5) break;  // fits, or as small as a tile can go: the rest scrolls
+    dash.style.setProperty("--units", need);
+    fitTiles();
+  }
+  if (stage.clientWidth !== was[0] || stage.clientHeight !== was[1]) drawCanvas();  // the map's own size changed
 }
 $("#customize").addEventListener("click", () => setEditing(!editing));
 $("#panelbtn").addEventListener("click", () => openPanel(!document.body.classList.contains("panel-open")));
